@@ -2,8 +2,8 @@ import prisma from "../lib/prisma"
 import bcrypt from "bcryptjs"
 import { type Request, type Response } from "express"
 import { sendEmail } from "../lib/sendEmail"
-import { signAccessToken, signRefreshToken } from "../lib/jwt";
-
+import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../lib/jwt";
+import jwt, { type JwtPayload } from "jsonwebtoken"
 
 
 export async function registerUser(req: Request, res: Response) {
@@ -281,7 +281,7 @@ export async function loginUser(req: Request, res: Response) {
         // Check that user has provided the email, mobile number and password or not. 
         const {email, mobileNo,password} = req.body
         
-        if(!email || !mobileNo){
+        if(!email && !mobileNo){
             return res.status(404)
             .json({
                 success: false,
@@ -337,10 +337,6 @@ export async function loginUser(req: Request, res: Response) {
         const accessToken = signAccessToken({id: isUserExist.id, email: isUserExist.email, mobileNo: isUserExist.mobileNo})
         const refreshToken = signRefreshToken({id: isUserExist.id, email: isUserExist.email, mobileNo: isUserExist.mobileNo})
 
-        const options= {
-            httpOnly:true,
-            secure:true
-        }
         // Update the refresh Token in the database. 
         const updatedUser = await prisma.user.update({
             where:{
@@ -348,15 +344,29 @@ export async function loginUser(req: Request, res: Response) {
             },
             data:{
                 refreshToken: refreshToken
+            },
+            omit:{
+                password: true,
+                refreshToken: true
             }
         })
 
+
+
         return res.status(200)
-        .cookie("accessToken",accessToken,options)
-        .cookie("refreshToken",refreshToken,options)
+        .cookie("accessToken",accessToken,{
+        httpOnly: true,
+        secure: true,
+        })
+        .cookie("refreshToken",refreshToken,{
+            httpOnly: true,
+            secure: true,
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        })
         .json({
             sucess: true,
-            message: "User logged in successfully"
+            message: "User logged in successfully",
+            userData: updatedUser
         })
 
         
@@ -366,6 +376,255 @@ export async function loginUser(req: Request, res: Response) {
         .json({
             success: false,
             message: error.message
+        })
+        
+    }
+}
+
+export async function updatePassword(req: Request, res: Response){
+    try {
+
+        // Check that the user id is provided or not. 
+        const userId = req.params.userId
+
+        if(!userId){
+            return res.status(404)
+            .json({
+                success: false,
+                message: "User id is required"
+            })
+        }
+        console.log(req.user)
+        if(userId!==req.user.id){
+            return res.status(400)
+            .json({
+                success: false,
+                message: "Logged in user and the user id does not match"
+            })
+        }
+
+        // Check that the newPassword and confirm Password is provided or not. 
+        const {oldPassword, newPassword,confirmPassword} = req.body
+        if(!oldPassword || !newPassword || !confirmPassword){
+            return res.status(404)
+            .json({
+                success: false,
+                message: "Old Password,New Password and confirmPassword is required"
+            })
+        }
+
+        // Check that both are equal
+        if(newPassword!==confirmPassword){
+            return res.status(400)
+            .json({
+                success: false,
+                message: "New Password and confirm Password does not match."
+            })
+        }
+
+        const isUserExist = req.user
+
+        // Check that the old password is correct. 
+        const isPasswordCorrect = await bcrypt.compare(oldPassword, isUserExist.password)
+
+        if(!isPasswordCorrect){
+            return res.status(400)
+            .json({
+                success: false,
+                message: "Old Password is incorrect."
+            })
+        }
+
+        // Now encrypt the new Password and update it in database.
+        const hashedPassword = await bcrypt.hash(newPassword,10);
+
+        const updatedUser = await prisma.user.update({
+            where:{
+                id: userId
+            },
+            data:{
+                password: hashedPassword
+            }
+        })
+
+        return res.status(200)
+        .json({
+            success: true,
+            message: "User password updated successfully"
+        })
+
+        
+    } catch (error:any) {
+        console.log(error)
+        return res.status(500)
+        .json({
+            success: false,
+            message: error.message || "Server Error while updating the password"
+        })
+        
+    }
+}
+
+export async function updateAccessToken(req: Request, res: Response){
+    try {
+        // Check the incoming refresh token from the frontend.
+        const incomingRefreshToken= req.cookies?.refreshToken || req.body.refreshToken
+
+        if(!incomingRefreshToken){
+            return res.status(400)
+            .json({
+                success: false,
+                message: "Invalid Refresh Token"
+            })
+        }   
+
+        const decodedToken = jwt.verify(incomingRefreshToken,process.env.REFRESH_TOKEN_SECRET!) as JwtPayload
+
+        const user = await prisma.user.findFirst({
+            where:{
+                id: decodedToken?.id
+            }
+        })
+
+        if(!user){
+            return res.status(400)
+            .json({
+                success: false,
+                message: "Invalid refresh token"
+            })
+        }
+
+        if(incomingRefreshToken!== user?.refreshToken){
+            return res.status(400)
+            .json({
+                success: false,
+                message: "Refresh Token is expired or used."
+            })
+        }
+
+        // Generate the tokens for cookies. 
+        const accessToken = signAccessToken({id: user.id, email: user.email, mobileNo: user.mobileNo})
+        const refreshToken = signRefreshToken({id: user.id, email: user.email, mobileNo: user.mobileNo})
+
+        // Update the refresh Token in the database. 
+        const updatedUser = await prisma.user.update({
+            where:{
+                id: user.id
+            },
+            data:{
+                refreshToken: refreshToken
+            },
+            omit:{
+                password: true,
+                refreshToken: true
+            }
+        })
+
+       return res.status(200)
+        .cookie("accessToken",accessToken,{
+        httpOnly: true,
+        secure: true,
+        })
+        .cookie("refreshToken",refreshToken,{
+            httpOnly: true,
+            secure: true,
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        })
+        .json({
+            success: true,
+            userData: updatedUser,
+            message: "Access token and refresh token updated successfully"
+        })
+
+
+        
+    } catch (error:any) {
+        console.log(error)
+        return res.status(500)
+        .json({
+            success: false,
+            message: error.message || "Server error while updating the access token"
+        })
+        
+    }
+}
+
+export async function LogoutUser(req: Request,res: Response){
+    try {
+        // Check that the user is logged in or not. 
+        const user  = req.user
+
+        if(!user){
+            return res.status(400)
+            .json({
+                success: false,
+                message: "Unauthorized Request"
+            })
+        }
+
+        // Remove the Refresh Token from the database.
+        const updatedUser = await prisma.user.update({
+            where:{
+                id: user.id
+            },
+            data:{
+                refreshToken: null
+            }
+        })
+        const options = {
+            httpOnly: true,
+            secure: true
+        }
+
+        // Remove the tokens from cookies.
+        res.clearCookie("accessToken",options)
+        res.clearCookie("refreshToken",options)
+
+        return res.status(200)
+        .json({
+            success: true,
+            message: "User logged out successfully"
+        })
+
+        
+    } catch (error:any) {
+        console.log(error)
+        return res.status(500)
+        .json({
+            success: false,
+            message: error.message || "Error while logout"
+        })
+        
+    }
+}
+
+export async function getLoggedInUser(req: Request,res: Response){
+    try {
+        const loggedInUser = req.user
+        if(!loggedInUser){
+            return res.status(400)
+            .json({
+                success: false,
+                message: "User is not logged in."
+            })
+        }
+
+        delete loggedInUser.password
+        delete loggedInUser.refreshToken
+
+        return res.status(200)
+        .json({
+            success: true,
+            message: "User Profile fetched successfully",
+            userData: loggedInUser
+        })
+
+    } catch (error:any) {
+        console.log(error)
+        return res.status(400)
+        .json({
+            success: false,
+            message: error.message || "Server error while fetching logged in user"
         })
         
     }

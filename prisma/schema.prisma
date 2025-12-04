@@ -3,7 +3,6 @@ generator client {
   output   = "../src/generated/prisma"
 }
 
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -15,12 +14,53 @@ model User {
   email                   String
   password                String
   mobileNo                String
+  // avatar                  String          // This is the cloudinary url string
   isVerified              Boolean   @default(false)
   verificationCode        String?
   verificationCodeExpiry  DateTime?
   resetPasswordCode       String?
   resetPasswordCodeExpiry DateTime?
   refreshToken            String?
-  createdAt               DateTime      @default(now())
-  updatedAt               DateTime      @updatedAt
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+}
+
+model Driver {
+  id                      String    @id @default(uuid()) @db.Uuid
+  userName                String
+  email                   String
+  password                String
+  mobileNo                String
+  // avatar                  String          // This is the cloudinary url string
+  isVerified              Boolean   @default(false)
+  verificationCode        String?
+  verificationCodeExpiry  DateTime?
+  resetPasswordCode       String?
+  resetPasswordCodeExpiry DateTime?
+  refreshToken            String?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+}
+
+model busStop {
+  id            Int      @id @default(autoincrement())
+  busStopName   String
+  ticketPrice   Float
+  distance      Float
+  busId         String  @db.Uuid
+  // departureTime DateTime
+  arrivalTime   String
+  bus           Bus      @relation(fields: [busId], references: [id], onDelete: Cascade)
+}
+
+model Bus {
+  id         String    @id @default(uuid()) @db.Uuid
+  busName    String
+  busNumber  String
+  seatMatrix Boolean[] @default([])
+  rating     Float     @default(0.0)
+  stops      busStop[]
+  // lat and lng are stored for location.
+  lat        Float?
+  lng        Float?
 }
