@@ -23,6 +23,7 @@ export type Bus ={
     lng: number
 }
 
+
 export async function registerBus(req:Request,res: Response){
     try {
         // Take the following values from the frontend. 
@@ -120,3 +121,35 @@ export async function registerBus(req:Request,res: Response){
         
     }
 }   
+
+
+export async function getHomePageBusDetails(req:Request, res: Response){
+    try {
+        const demoBusDetails = await prisma.bus.findMany({
+            take:10
+        })
+
+        if(!demoBusDetails){
+            return res.status(500)
+            .json({
+                success: false,
+                message: "Errow while getting the bus details"
+            })
+        }
+
+        return res.status(200)
+        .json({
+            success: true,
+            message: "Bus Detaills fetched successfully",
+            busDetails: demoBusDetails
+        })
+        
+    } catch (error:any) {
+        console.log(error)
+        return res.status(500)
+        .json({
+            success: false,
+            message: error.message || "Error while getting the bus details"
+        })
+    }
+}

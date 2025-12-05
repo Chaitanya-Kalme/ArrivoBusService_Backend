@@ -10,22 +10,26 @@
     "dev": "nodemon --watch src --ext ts,js --exec tsx src/index.ts"
   },
   "dependencies": {
-    "@auth/core": "^0.34.3",
-    "@auth/express": "^0.12.1",
     "@prisma/client": "^6.19.0",
     "bcryptjs": "^3.0.2",
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "fs-extra": "^11.3.2",
+    "handlebars": "^4.7.8",
     "jsonwebtoken": "^9.0.2",
-    "nodemailer": "^7.0.11"
+    "nodemailer": "^7.0.11",
+    "puppeteer": "^24.32.0"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.5",
+    "@types/fs-extra": "^11.0.4",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.10.1",
     "@types/nodemailer": "^7.0.4",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
     "nodemon": "^3.1.10",
     "prisma": "^6.19.0",
     "ts-node": "^10.9.2",

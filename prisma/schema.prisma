@@ -23,6 +23,7 @@ model User {
   refreshToken            String?
   createdAt               DateTime  @default(now())
   updatedAt               DateTime  @updatedAt
+  bookings                Booking[]
 }
 
 model Driver {
@@ -43,24 +44,69 @@ model Driver {
 }
 
 model busStop {
-  id            Int      @id @default(autoincrement())
-  busStopName   String
-  ticketPrice   Float
-  distance      Float
-  busId         String  @db.Uuid
+  id               Int       @id @default(autoincrement())
+  busStopName      String
+  ticketPrice      Float
+  distance         Float
+  busId            String    @db.Uuid
   // departureTime DateTime
-  arrivalTime   String
-  bus           Bus      @relation(fields: [busId], references: [id], onDelete: Cascade)
+  arrivalTime      String
+  bus              Bus       @relation(fields: [busId], references: [id], onDelete: Cascade)
+  boardingTrips    Booking[] @relation("BoardingStation")
+  destinationTrips Booking[] @relation("DestinationStation")
 }
 
 model Bus {
-  id         String    @id @default(uuid()) @db.Uuid
-  busName    String
-  busNumber  String
-  seatMatrix Boolean[] @default([])
-  rating     Float     @default(0.0)
-  stops      busStop[]
+  id                String    @id @default(uuid()) @db.Uuid
+  busName           String
+  busNumber         String
+  seatMatrix        Boolean[] @default([])
+  rating            Float     @default(0.0)
+  stops             busStop[]
   // lat and lng are stored for location.
-  lat        Float?
-  lng        Float?
+  lat               Float?
+  lng               Float?
+  passengersBooking Booking[]
+}
+
+enum PaymentStatus {
+  Completed
+  Pending
+  Failed
+}
+
+enum Gender {
+  Male
+  Female
+  Other
+}
+
+model Passenger {
+  id               String  @id @default(uuid()) @db.Uuid
+  passengerName    String
+  age              Int
+  gender           Gender
+  bookedSeatNumber Int
+  bookingId        String  @db.Uuid
+  booking          Booking @relation(fields: [bookingId], references: [id])
+}
+
+model Booking {
+  id                     String        @id @default(uuid()) @db.Uuid
+  busId                  String        @db.Uuid
+  bus                    Bus           @relation(fields: [busId], references: [id], onDelete: Cascade)
+  userBookingId          String        @db.Uuid
+  bookingUser            User          @relation(fields: [userBookingId], references: [id], onDelete: Cascade)
+  paymentStatus          PaymentStatus @default(Pending)
+  paymentId              String?       @db.Uuid
+  razorpayId             String?
+  PassengersList         Passenger[]
+  boardingStationId      Int
+  boardingStation        busStop       @relation("BoardingStation", fields: [boardingStationId], references: [id], onDelete: Cascade)
+  destinationStopId      Int
+  destinationStop        busStop       @relation("DestinationStation", fields: [destinationStopId], references: [id], onDelete: Cascade)
+  amountPaid             Float
+  emailId                String
+  mobileNumber           String
+  emergencyContactNumber String?
 }

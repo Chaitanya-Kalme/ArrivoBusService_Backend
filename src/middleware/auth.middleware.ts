@@ -14,6 +14,9 @@ export default async function verifyJWT (req:Request,res: Response,next:NextFunc
         const user = await prisma.user.findFirst({
             where:{
                 id: decodedToken?.id
+            },
+            include:{
+                bookings: true
             }
         })
         
