@@ -229,10 +229,10 @@ export const sendEmail = async({emailId,userId,emailType}:{emailId: string,userI
         }
 
         // Email Send logic
-        // const mailResponse = await transporter.sendMail(mailOption)
+        const mailResponse = await transporter.sendMail(mailOption)
         const reponse = {
             status: 200,
-            // message: mailResponse
+            message: mailResponse
         }
         return reponse;
 

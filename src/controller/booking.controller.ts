@@ -1,4 +1,4 @@
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import prisma from "../lib/prisma";
 import { Gender } from "../generated/prisma";
 import puppeteer from "puppeteer";
@@ -6,7 +6,9 @@ import path from "path";
 import handlebars from "handlebars";
 import fs from "fs-extra"
 import { fileURLToPath } from "url";
+import nodemailer from "nodemailer"
 
+// 📌 We have to ensure that if the ticket is already booked then we have to book the another seat. 
 
 
 type passenger = {
@@ -48,7 +50,11 @@ export async function registerBooking(req: Request, res: Response) {
                 id: busId
             },
             include: {
-                stops: true
+                busDetails: {
+                    include: {
+                        stops: true
+                    }
+                }
             }
         })
 
@@ -61,7 +67,7 @@ export async function registerBooking(req: Request, res: Response) {
         }
 
         // Check boarding station id exist with this bus. 
-        const busStopList = isBusExist.stops
+        const busStopList = isBusExist.busDetails.stops
 
         const isBoardingStopExist = busStopList.some(stop => stop.id === parseInt(boardingStationId))
         const isDestinationStopExist = busStopList.some(stop => stop.id === parseInt(destinationStopId))
@@ -167,7 +173,7 @@ export async function registerBooking(req: Request, res: Response) {
 }
 
 
-export async function cancelBooking(req: Request, res: Response) {
+export async function cancelBooking(req: Request, res: Response, next: NextFunction) {
     try {
         // Check that the user is logged in or not. 
         const user = req.user
@@ -196,6 +202,10 @@ export async function cancelBooking(req: Request, res: Response) {
         const isBookingExist = await prisma.booking.findFirst({
             where: {
                 id: bookingId
+            },
+            include: {
+                bus: true,
+                PassengersList: true
             }
         })
 
@@ -207,6 +217,23 @@ export async function cancelBooking(req: Request, res: Response) {
                 })
         }
 
+        // Now find the seats occupied by this booking. 
+        const seatMatrix = isBookingExist.bus.seatMatrix
+
+        isBookingExist.PassengersList.map((passenger) => {
+            seatMatrix[passenger.bookedSeatNumber] = false;
+        })
+
+        const updatedBus = await prisma.bus.update({
+            where: {
+                id: isBookingExist.busId
+            },
+            data: {
+                seatMatrix: seatMatrix
+            }
+        })
+
+
         // Delete booking
         await prisma.booking.delete({
             where: {
@@ -214,19 +241,11 @@ export async function cancelBooking(req: Request, res: Response) {
             }
         })
 
-        return res.status(200)
-            .json({
-                success: false,
-                message: "Booking cancelled successfully"
-            })
-
+        req.bookingId = bookingId
+        next()
     } catch (error: any) {
         console.log(error)
-        return res.status(500)
-            .json({
-                success: false,
-                message: error.message || "Server Error while cancel booking"
-            })
+        return null;
 
     }
 }
@@ -244,6 +263,25 @@ export async function sendEmailforBooking(req: Request, res: Response) {
                     message: "Booking Id is required."
                 })
         }
+
+        const booking = await prisma.booking.findFirst({
+            where:{
+                id: bookingId
+            },
+            include:{
+                bus: true,
+                bookingUser: true,
+            }
+        })
+
+        if(!booking){
+            return res.status(200)
+            .json({
+                success: false,
+                message: "Booking does not exist with this id"
+            })
+        }
+
         const data = {
             name: "Hello",
             email: "example1@example.com",
@@ -273,6 +311,34 @@ export async function sendEmailforBooking(req: Request, res: Response) {
         await browser.close();
 
         // Send Email here
+        var transporter = nodemailer.createTransport({
+            host: process.env.MAILTRAP_HOST,
+            port: Number(process.env.MAILTRAP_PORT),
+            auth: {
+                user: process.env.MAILTRAP_USER,
+                pass: process.env.MAILTRAP_PASS
+            }
+        });
+
+
+        // Content to send. Should be html /css format
+        const emailContent = ``
+
+        const mailOption = {
+            from: process.env.EMAIL_SENDING_DOMAIN,
+            to: booking?.emailId,
+            subject: "Verify Your Email",
+            html: emailContent,
+            attachments:[
+                {
+                    filename: `${booking.id}.pdf`,
+                    content: Buffer.from(pdfBuffer),
+                    contentType: "application/pdf"
+                }
+            ]
+        }
+
+        const mailResponse = await transporter.sendMail(mailOption)
 
         res.setHeader("Content-Type", "application/pdf");
         res.setHeader("Content-Disposition", `inline; filename=invoice.pdf`);
@@ -292,41 +358,53 @@ export async function sendEmailforBooking(req: Request, res: Response) {
 
 
 
-export async function sendEmailForCancellation(req: Request, res: Response){
+export async function sendEmailForCancellation(req: Request, res: Response) {
     try {
-        const bookingId = req.params.bookingId
+        const bookingId = req.bookingId
 
-        if(!bookingId){
+        if (!bookingId) {
             return res.status(404)
-            .json({
-                success: false,
-                message: "Booking Id is required to send email"
-            })
+                .json({
+                    success: false,
+                    message: "Error while deleting the booking"
+                })
         }
 
         const booking = await prisma.booking.findFirst({
-            where:{
+            where: {
                 id: bookingId
             },
-            include:{
+            include: {
                 bus: true,
                 PassengersList: true,
             }
         })
 
+        if (booking) {
+            return res.status(500)
+                .json({
+                    success: false,
+                    message: "Error while deleting the booking, please retry"
+                })
+        }
+
+
+        // Send Email Here
+
+
         return res.status(200)
-        .json({
-            success: true,
-            message: "Ticket cancellation email send successfully"
-        })
-        
-    } catch (error:any) {
+            .json({
+                success: true,
+                message: "Ticket cancellation email send successfully"
+            })
+
+    } catch (error: any) {
         console.log(error)
         return res.status(500)
-        .json({
-            success: false,
-            message: error.message || "Server error while sending the cancellation email"
-        })
+            .json({
+                success: false,
+                message: error.message || "Server error while sending the cancellation email"
+            })
     }
 }
 

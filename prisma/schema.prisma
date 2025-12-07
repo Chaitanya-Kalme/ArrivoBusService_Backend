@@ -44,25 +44,33 @@ model Driver {
 }
 
 model busStop {
-  id               Int       @id @default(autoincrement())
+  id               Int        @id @default(autoincrement())
   busStopName      String
   ticketPrice      Float
   distance         Float
-  busId            String    @db.Uuid
-  // departureTime DateTime
+  busDetailsId     String     @db.Uuid
   arrivalTime      String
-  bus              Bus       @relation(fields: [busId], references: [id], onDelete: Cascade)
-  boardingTrips    Booking[] @relation("BoardingStation")
-  destinationTrips Booking[] @relation("DestinationStation")
+  bus              busDetails @relation(fields: [busDetailsId], references: [id], onDelete: Cascade)
+  boardingTrips    Booking[]  @relation("BoardingStation")
+  destinationTrips Booking[]  @relation("DestinationStation")
+}
+
+model busDetails {
+  id         String    @id @default(uuid()) @db.Uuid
+  busName    String
+  busNumber  String
+  stops      busStop[]
+  rating     Float     @default(0.0)
+  buses      Bus[]
+  totalSeats Int
 }
 
 model Bus {
-  id                String    @id @default(uuid()) @db.Uuid
-  busName           String
-  busNumber         String
-  seatMatrix        Boolean[] @default([])
-  rating            Float     @default(0.0)
-  stops             busStop[]
+  id                String     @id @default(uuid()) @db.Uuid
+  busDetailsId      String     @db.Uuid
+  busDetails        busDetails @relation(fields: [busDetailsId], references: [id])
+  seatMatrix        Boolean[]  @default([])
+  dateAndTime       DateTime
   // lat and lng are stored for location.
   lat               Float?
   lng               Float?

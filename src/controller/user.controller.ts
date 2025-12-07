@@ -111,6 +111,14 @@ export async function sendVerificationEmail(req: Request, res: Response) {
                 })
         }
 
+        if(user.isVerified){
+            return res.status(400)
+            .json({
+                success: false,
+                message: "User already verified"
+            })
+        }
+
         // Email Sending function call 
         const response = await sendEmail({ emailId: user.email, emailType: type, userId: user.id })
 
@@ -627,5 +635,65 @@ export async function getLoggedInUser(req: Request,res: Response){
             message: error.message || "Server error while fetching logged in user"
         })
         
+    }
+}
+
+
+export async function updateUserDetails(req: Request, res: Response){
+    try {
+        // Check that user is logged in or not. 
+        const user= req.user
+        const {userName, email, mobileNo} = req.body
+
+        if(!user){
+            return res.status(400)
+            .json({
+                success: false,
+                message: "User is not logged in"
+            })
+        }
+
+
+        if(!userName && !email && !mobileNo){
+            return res.status(404)
+            .json({
+                success: "Some fields are required to change the details"
+            })
+        }
+
+        const fieldsToUpdate: any = {};
+        if(userName){
+            fieldsToUpdate.userName = userName
+        }
+        if(email){
+            fieldsToUpdate.email = email
+        }
+        if(mobileNo){
+            fieldsToUpdate.mobileNo = mobileNo
+        }
+
+        const updatedUser = await prisma.user.update({
+            where:{
+                id: req.user.id
+            },
+            data:{
+                ...fieldsToUpdate
+            }
+        })
+
+        return res.status(200)
+        .json({
+            success: true,
+            message: "User details updated successfully",
+            userData: updatedUser
+        })
+        
+    } catch (error:any) {
+        console.log(error)
+        return res.status(500)
+        .json({
+            success: false,
+            message: error.message || "Server error while updating user details"
+        })
     }
 }

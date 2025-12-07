@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getLoggedInUser, getUserProfile, loginUser, LogoutUser, registerUser, sendVerificationEmail, updateAccessToken, updatePassword, verifyUser } from "../controller/user.controller.ts";
+import { getLoggedInUser, getUserProfile, loginUser, LogoutUser, registerUser, sendVerificationEmail, updateAccessToken, updatePassword, updateUserDetails, verifyUser } from "../controller/user.controller.ts";
 import verifyJWT from "../middleware/auth.middleware.js";
 
 
@@ -14,5 +14,7 @@ router.route("/changePassword/:userId").patch(verifyJWT,updatePassword)
 router.route("/refreshAccessToken").patch(updateAccessToken)
 router.route("/logout").post(verifyJWT,LogoutUser)
 router.route("/getLoggedInUser").get(verifyJWT,getLoggedInUser)
+router.route("/updateUserDetails").post(verifyJWT, updateUserDetails)
+
 
 export default router

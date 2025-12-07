@@ -7,12 +7,11 @@ export type busStop =  {
   ticketPrice: number,
   distance: number,
   busId: string,
-  bus: Bus,
+  bus: BusDetails,
   arrivalTime: string,
-//   departureTime: Date
 }
 
-export type Bus ={
+export type BusDetails ={
     id: string,
     busName: string,
     busNumber: string,
@@ -40,7 +39,7 @@ export async function registerBus(req:Request,res: Response){
         }
 
         // Check that the bus already exist with the bus number or busName
-        const isBusExist = await prisma.bus.findFirst({
+        const isBusExist = await prisma.busDetails.findFirst({
             where:{
                 busNumber: busNumber,
             }
@@ -54,13 +53,12 @@ export async function registerBus(req:Request,res: Response){
             })
         }
         
-        const seatMatrix = Array(totalSeats).fill(false)
 
-        const busCreated = await prisma.bus.create({
+        const busCreated = await prisma.busDetails.create({
             data:{
                 busName: busName,
                 busNumber: busNumber,
-                seatMatrix: seatMatrix
+                totalSeats: totalSeats
             }
         })
 
@@ -79,7 +77,7 @@ export async function registerBus(req:Request,res: Response){
                     busStopName: busStop.busStopName,
                     ticketPrice: busStop.ticketPrice,
                     distance: busStop.distance,
-                    busId: busCreated.id,
+                    busDetailsId: busCreated.id,
                     arrivalTime: busStop.arrivalTime
                 }
             })
@@ -93,7 +91,7 @@ export async function registerBus(req:Request,res: Response){
         })
 
         // Bus data to send
-        const busInformation = await prisma.bus.findFirst({
+        const busInformation = await prisma.busDetails.findFirst({
             where: {
                 id: busCreated.id
             },
@@ -126,7 +124,12 @@ export async function registerBus(req:Request,res: Response){
 export async function getHomePageBusDetails(req:Request, res: Response){
     try {
         const demoBusDetails = await prisma.bus.findMany({
-            take:10
+            where:{
+                dateAndTime: {
+                    gt: new Date()
+                }
+            },
+            take:10,
         })
 
         if(!demoBusDetails){
@@ -151,5 +154,81 @@ export async function getHomePageBusDetails(req:Request, res: Response){
             success: false,
             message: error.message || "Error while getting the bus details"
         })
+    }
+}
+
+export async function createBusTrip(req: Request, res: Response){
+    try {
+        // Get the bus details id, date and time from frontend.
+        const {busDetailId, dateAndTime} = req.body
+
+        if(!busDetailId || !dateAndTime){
+            return res.status(404)
+            .json({
+                success: false,
+                message: "Bus Details Id, Date and Time is required"
+            })
+        }
+
+        // Check that the bus Detail entry exist or not.
+        const isBusDetailsExist = await prisma.busDetails.findFirst({
+            where:{
+                id: busDetailId,
+            }
+        })
+
+        if(!isBusDetailsExist){
+            return res.status(400)
+            .json({
+                success: false,
+                message: "Bus Details does not exist."
+            })
+        }
+
+        // Check that the bus Entry already exist with this date and time. 
+        const isBusAlreadyExist = await prisma.bus.findFirst({
+            where:{
+                busDetailsId: busDetailId,
+                dateAndTime: dateAndTime
+            }
+        })
+
+        if(isBusAlreadyExist){
+            return res.status(400)
+            .json({
+                success: false,
+                message: "bus already exist with this date and time and busDetailsId"
+            })
+        }
+        // Now Create the seat matrix for the bus. 
+        const seatMatrix: boolean[] = Array(isBusDetailsExist.totalSeats).fill(false)
+
+
+        // Now create bus 
+        const busCreated = await prisma.bus.create({
+            data:{
+                busDetailsId: busDetailId,
+                dateAndTime: dateAndTime,
+                seatMatrix: seatMatrix                
+            }
+        })
+
+
+        return res.status(200)
+        .json({
+            success: false,
+            message: "Bus Created successfully",
+            busData: busCreated
+        })
+        
+        
+    } catch (error:any) {
+        console.log(error)
+        return res.status(500)
+        .json({
+            success: false,
+            message: error.message || "Error while creating bus trip"
+        })
+        
     }
 }
