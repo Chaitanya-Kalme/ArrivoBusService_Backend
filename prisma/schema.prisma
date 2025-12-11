@@ -117,4 +117,6 @@ model Booking {
   emailId                String
   mobileNumber           String
   emergencyContactNumber String?
+  // createdAt             DateTime @default(now())
+  // updatedAt           DateTime   @updatedAt
 }

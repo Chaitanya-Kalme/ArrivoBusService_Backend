@@ -1,0 +1,175 @@
+let buses = [
+  {
+    "busNumber": "KA-01-AA-1001",
+    "busName": "BMTC City Express",
+    "totalSeats": 40,
+    "busStopList": [
+      { "busStopName": "Majestic", "ticketPrice": 0, "distance": 0, "arrivalTime": "07:00" },
+      { "busStopName": "Shivaji Nagar", "ticketPrice": 10, "distance": 3.2, "arrivalTime": "07:10" },
+      { "busStopName": "Ulsoor", "ticketPrice": 16, "distance": 5.1, "arrivalTime": "07:18" }
+    ]
+  },
+  {
+    "busNumber": "KA-01-AA-1002",
+    "busName": "BMTC Volvo Vayu Vajra",
+    "totalSeats": 45,
+    "busStopList": [
+      { "busStopName": "Kempegowda Airport", "ticketPrice": 0, "distance": 0, "arrivalTime": "06:30" },
+      { "busStopName": "Hebbal", "ticketPrice": 80, "distance": 28.5, "arrivalTime": "07:10" },
+      { "busStopName": "Mekhri Circle", "ticketPrice": 100, "distance": 34.2, "arrivalTime": "07:20" }
+    ]
+  },
+  {
+    "busNumber": "KA-02-BB-2001",
+    "busName": "Ring Road Rapid",
+    "totalSeats": 42,
+    "busStopList": [
+      { "busStopName": "Silk Board", "ticketPrice": 0, "distance": 0, "arrivalTime": "08:00" },
+      { "busStopName": "BTM Layout", "ticketPrice": 6, "distance": 1.2, "arrivalTime": "08:05" },
+      { "busStopName": "Jayadeva Hospital", "ticketPrice": 10, "distance": 2.3, "arrivalTime": "08:10" },
+      { "busStopName": "Jayanagar 4th Block", "ticketPrice": 14, "distance": 4.7, "arrivalTime": "08:18" }
+    ]
+  },
+  {
+    "busNumber": "KA-02-BB-2002",
+    "busName": "Metro Link Shuttle",
+    "totalSeats": 32,
+    "busStopList": [
+      { "busStopName": "Nagasandra Metro", "ticketPrice": 0, "distance": 0, "arrivalTime": "09:00" },
+      { "busStopName": "Jalahalli Cross", "ticketPrice": 7, "distance": 2.8, "arrivalTime": "09:07" },
+      { "busStopName": "Peenya 2nd Stage", "ticketPrice": 12, "distance": 4.9, "arrivalTime": "09:14" }
+    ]
+  },
+  {
+    "busNumber": "KA-03-CC-3001",
+    "busName": "BMTC AC Express",
+    "totalSeats": 50,
+    "busStopList": [
+      { "busStopName": "KR Puram", "ticketPrice": 0, "distance": 0, "arrivalTime": "06:40" },
+      { "busStopName": "Tin Factory", "ticketPrice": 5, "distance": 1.5, "arrivalTime": "06:45" },
+      { "busStopName": "Benniganahalli", "ticketPrice": 12, "distance": 4.3, "arrivalTime": "06:55" },
+      { "busStopName": "Indiranagar", "ticketPrice": 18, "distance": 6.2, "arrivalTime": "07:05" }
+    ]
+  },
+  {
+    "busNumber": "KA-03-CC-3002",
+    "busName": "BMTC Metro Feeder",
+    "totalSeats": 38,
+    "busStopList": [
+      { "busStopName": "Banashankari Metro", "ticketPrice": 0, "distance": 0, "arrivalTime": "09:15" },
+      { "busStopName": "Banashankari TTMC", "ticketPrice": 5, "distance": 1.1, "arrivalTime": "09:18" },
+      { "busStopName": "Jayanagar 9th Block", "ticketPrice": 10, "distance": 3.4, "arrivalTime": "09:25" },
+      { "busStopName": "Stratford School", "ticketPrice": 14, "distance": 4.9, "arrivalTime": "09:30" }
+    ]
+  },
+  {
+    "busNumber": "KA-04-DD-4001",
+    "busName": "Outer Ring Road Volvo",
+    "totalSeats": 55,
+    "busStopList": [
+      { "busStopName": "Marathahalli", "ticketPrice": 0, "distance": 0, "arrivalTime": "07:25" },
+      { "busStopName": "Ecospace", "ticketPrice": 10, "distance": 2.6, "arrivalTime": "07:30" },
+      { "busStopName": "Bellandur Gate", "ticketPrice": 15, "distance": 4.2, "arrivalTime": "07:34" },
+      { "busStopName": "Agara Lake", "ticketPrice": 20, "distance": 6.5, "arrivalTime": "07:40" }
+    ]
+  },
+  {
+    "busNumber": "KA-04-DD-4002",
+    "busName": "Sarjapur Road Feeder",
+    "totalSeats": 30,
+    "busStopList": [
+      { "busStopName": "Sarjapur", "ticketPrice": 0, "distance": 0, "arrivalTime": "10:00" },
+      { "busStopName": "Wipro Gate", "ticketPrice": 8, "distance": 3.1, "arrivalTime": "10:10" },
+      { "busStopName": "RMZ EcoWorld", "ticketPrice": 12, "distance": 4.7, "arrivalTime": "10:14" }
+    ]
+  },
+  {
+    "busNumber": "KA-05-EE-5001",
+    "busName": "Electronic City Shuttle",
+    "totalSeats": 48,
+    "busStopList": [
+      { "busStopName": "Electronic City Phase 1", "ticketPrice": 0, "distance": 0, "arrivalTime": "08:45" },
+      { "busStopName": "Infosys Gate 6", "ticketPrice": 5, "distance": 1.0, "arrivalTime": "08:48" },
+      { "busStopName": "Wipro EC", "ticketPrice": 10, "distance": 3.9, "arrivalTime": "08:55" }
+    ]
+  },
+  {
+    "busNumber": "KA-05-EE-5002",
+    "busName": "Electronic City Volvo",
+    "totalSeats": 44,
+    "busStopList": [
+      { "busStopName": "Electronic City Phase 2", "ticketPrice": 0, "distance": 0, "arrivalTime": "09:20" },
+      { "busStopName": "HCL Tech Park", "ticketPrice": 6, "distance": 2.2, "arrivalTime": "09:26" },
+      { "busStopName": "TCS Circle", "ticketPrice": 12, "distance": 5.0, "arrivalTime": "09:33" }
+    ]
+  },
+  {
+    "busNumber": "KA-06-FF-6001",
+    "busName": "Hebbal Express",
+    "totalSeats": 52,
+    "busStopList": [
+      { "busStopName": "Hebbal", "ticketPrice": 0, "distance": 0, "arrivalTime": "07:50" },
+      { "busStopName": "Nagawara", "ticketPrice": 7, "distance": 2.3, "arrivalTime": "07:56" },
+      { "busStopName": "Manyata Gate 5", "ticketPrice": 12, "distance": 4.1, "arrivalTime": "08:00" }
+    ]
+  },
+  {
+    "busNumber": "KA-06-FF-6002",
+    "busName": "North Bangalore Rapid",
+    "totalSeats": 36,
+    "busStopList": [
+      { "busStopName": "Yelahanka", "ticketPrice": 0, "distance": 0, "arrivalTime": "08:10" },
+      { "busStopName": "Attur Layout", "ticketPrice": 4, "distance": 1.4, "arrivalTime": "08:14" },
+      { "busStopName": "Kogilu Cross", "ticketPrice": 9, "distance": 3.2, "arrivalTime": "08:19" },
+      { "busStopName": "Hebbal", "ticketPrice": 15, "distance": 7.0, "arrivalTime": "08:30" }
+    ]
+  },
+  {
+    "busNumber": "KA-07-GG-7001",
+    "busName": "City Shuttle Local",
+    "totalSeats": 28,
+    "busStopList": [
+      { "busStopName": "Wilson Garden", "ticketPrice": 0, "distance": 0, "arrivalTime": "09:40" },
+      { "busStopName": "Lalbagh West Gate", "ticketPrice": 5, "distance": 1.7, "arrivalTime": "09:44" },
+      { "busStopName": "KR Market", "ticketPrice": 10, "distance": 3.9, "arrivalTime": "09:50" }
+    ]
+  },
+  {
+    "busNumber": "KA-07-GG-7002",
+    "busName": "South End Rapid",
+    "totalSeats": 34,
+    "busStopList": [
+      { "busStopName": "South End Circle", "ticketPrice": 0, "distance": 0, "arrivalTime": "10:15" },
+      { "busStopName": "Jayanagar 4th Block", "ticketPrice": 6, "distance": 1.9, "arrivalTime": "10:19" },
+      { "busStopName": "Jayanagar 1st Block", "ticketPrice": 10, "distance": 4.3, "arrivalTime": "10:25" }
+    ]
+  },
+  {
+    "busNumber": "KA-08-HH-8001",
+    "busName": "Metro Feeder North",
+    "totalSeats": 40,
+    "busStopList": [
+      { "busStopName": "Nagawara", "ticketPrice": 0, "distance": 0, "arrivalTime": "07:15" },
+      { "busStopName": "Elements Mall", "ticketPrice": 6, "distance": 2.0, "arrivalTime": "07:20" },
+      { "busStopName": "Manyata Tech Park", "ticketPrice": 12, "distance": 3.8, "arrivalTime": "07:27" }
+    ]
+  }
+];
+
+// Get current index (default 0)
+let index = pm.environment.get("bus_index") || 0;
+
+// Set variables for body usage
+pm.environment.set("busData", JSON.stringify(buses[index]));
+
+// Prepare next iteration
+index++;
+
+if (index < buses.length) {
+    pm.environment.set("bus_index", index);
+    postman.setNextRequest(pm.info.requestName);
+} else {
+    // End loop
+    postman.setNextRequest(null);
+    pm.environment.unset("bus_index");
+}

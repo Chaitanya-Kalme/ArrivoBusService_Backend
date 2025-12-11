@@ -7,16 +7,16 @@ import handlebars from "handlebars";
 import fs from "fs-extra"
 import { fileURLToPath } from "url";
 import nodemailer from "nodemailer"
+import type { Bus } from "./bus.controller";
 
 // 📌 We have to ensure that if the ticket is already booked then we have to book the another seat. 
 
 
 type passenger = {
     id: string,
-    passengerName: string,
+    name: string,
     age: number,
     gender: String,
-    bookedSeatNumber: number
 }
 
 
@@ -34,9 +34,9 @@ export async function registerBooking(req: Request, res: Response) {
         }
 
         //  Now check that data taken from the frontend. 
-        const { busId, passengersList, emailId, phoneNo, emergencyContactNumber, boardingStationId, destinationStopId, amountPaid } = req.body
+        const { busId, passengersList, emailId, phoneNo, emergencyContactNumber, boardingStationId, destinationStopId, amountPaid,seatsBooked } = req.body
 
-        if (!busId || !passengersList || !emailId || !phoneNo || !boardingStationId || !destinationStopId || !amountPaid) {
+        if (!busId || !passengersList || !emailId || !phoneNo || !boardingStationId || !destinationStopId || !amountPaid || !seatsBooked) {
             return res.status(404)
                 .json({
                     success: false,
@@ -104,10 +104,10 @@ export async function registerBooking(req: Request, res: Response) {
 
         // Array of booked seat number
         let seatMatrixToUpdate: boolean[] = isBusExist.seatMatrix;
-
+        let index=0;
         // Register passengers in the bus. 
         passengersList.map(async (passengerDetails: passenger) => {
-            if (!passengerDetails.passengerName || !passengerDetails.age || !passengerDetails.gender) {
+            if (!passengerDetails.name || !passengerDetails.age || !passengerDetails.gender) {
                 return res.status(404)
                     .json({
                         success: false,
@@ -115,18 +115,18 @@ export async function registerBooking(req: Request, res: Response) {
                     })
             }
             let passengerGender;
-            if (passengerDetails.gender === "Male") passengerGender = Gender.Male;
-            else if (passengerDetails.gender === "Female") passengerGender = Gender.Female
+            if (passengerDetails.gender === "male") passengerGender = Gender.Male;
+            else if (passengerDetails.gender === "female") passengerGender = Gender.Female
             else passengerGender = Gender.Other
-            seatMatrixToUpdate[passengerDetails.bookedSeatNumber] = true;
+            seatMatrixToUpdate[seatsBooked[index]-1] = true;
 
             const passengerRegistration = await prisma.passenger.create({
                 data: {
-                    passengerName: passengerDetails.passengerName,
-                    age: passengerDetails.age,
+                    passengerName: passengerDetails.name,
+                    age: parseInt(passengerDetails.age.toString()),
                     gender: passengerGender,
                     bookingId: booking.id,
-                    bookedSeatNumber: passengerDetails.bookedSeatNumber
+                    bookedSeatNumber: seatsBooked[index]-1
                 }
             })
 
@@ -137,6 +137,7 @@ export async function registerBooking(req: Request, res: Response) {
                         message: "Error while registering. "
                     })
             }
+            index++
         })
 
         // Now update the seat matrix of bus.
@@ -150,14 +151,31 @@ export async function registerBooking(req: Request, res: Response) {
         })
 
 
+
         // Payment flow
 
+        // Send Email
+
+        // Now we have to send the booking of the passengers.
+        const bookingData = await prisma.booking.findFirst({
+            where:{
+                id: booking.id
+            },
+            include:{
+                boardingStation: true,
+                destinationStop: true,
+                PassengersList: true,
+                bookingUser: true,
+                bus: true
+            }
+        })
 
 
         return res.status(200)
             .json({
                 success: true,
-                message: "Ticket Booked successfully"
+                message: "Ticket Booked successfully",
+                bookingData: bookingData
             })
 
 
@@ -408,6 +426,78 @@ export async function sendEmailForCancellation(req: Request, res: Response) {
     }
 }
 
+
+export async function fetchUserBookings(req:Request,res: Response){
+    try {
+        const userId = req.params.userId
+    
+        if(!userId){
+            return res.status(400)
+            .json({
+                success: false,
+                message: "User id is required"
+            })
+        }
+    
+        const user = await prisma.user.findFirst({
+            where:{
+                id: userId
+            },
+            include:{
+                bookings: {
+                    include:{
+                        bus: {
+                            include:{
+                                busDetails: {
+                                    include:{
+                                        stops: true
+                                    }
+                                }
+                            }
+                        },
+                        PassengersList: true,
+                        boardingStation: true,
+                        destinationStop: true,
+                    }
+                }
+            }
+        })
+    
+        if(!user){
+            return res.status(400)
+            .json({
+                success: false,
+                message: "User does not exist."
+            })
+        }
+
+        // Sort stops for each bus by arrivalTime
+        user.bookings.map((booking) =>{
+            booking.bus.busDetails.stops.sort((a, b) => {
+            // Use "00:00" as default if arrivalTime is undefined
+            const [ah = 0, am = 0] = (a.arrivalTime ?? "00:00").split(":").map(Number);
+            const [bh = 0, bm = 0] = (b.arrivalTime ?? "00:00").split(":").map(Number);
+
+            if (ah !== bh) return ah - bh;
+            return am - bm;
+        })})
+    
+        return res.status(200)
+        .json({
+            success: true,
+            message: "Booking fetched successfully",
+            bookings: user.bookings
+        })
+    } catch (error:any) {
+        console.log(error)
+        return res.status(500)
+        .json({
+            success: false,
+            message: error.message || "Server error while fetching bookings."
+        })
+        
+    }
+}
 
 
 

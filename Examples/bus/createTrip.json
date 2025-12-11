@@ -1,0 +1,62 @@
+[
+    {
+        "busDetailId": "12b2d1e9-d691-4b17-8292-d09db65d36c9",
+        "dateAndTime": "2025-12-08T06:30:00"
+    },
+    {
+        "busDetailId": "2441328d-d668-4fd7-bc88-3a1bff88c1d4",
+        "dateAndTime": "2025-12-08T08:45:00"
+    },
+    {
+        "busDetailId": "279cb4c3-6fab-4f89-96b7-3d2ebcb5bbf8",
+        "dateAndTime": "2025-12-08T11:15:00"
+    },
+    {
+        "busDetailId": "4d228ea8-fc9c-4feb-9c89-fcc0e8345d26",
+        "dateAndTime": "2025-12-09T07:00:00"
+    },
+    {
+        "busDetailId": "5a0f7889-686c-4df5-802b-ab08f3ae5ee8",
+        "dateAndTime": "2025-12-09T09:30:00"
+    },
+    {
+        "busDetailId": "61fd31ed-947f-464b-bd3b-6c55a08c8ace",
+        "dateAndTime": "2025-12-09T13:45:00"
+    },
+    {
+        "busDetailId": "651b9468-d6cf-46e7-83db-1ae05e706f5c",
+        "dateAndTime": "2025-12-10T06:15:00"
+    },
+    {
+        "busDetailId": "72a7df58-82fa-4db6-8244-117ccd10417b",
+        "dateAndTime": "2025-12-10T10:00:00"
+    },
+    {
+        "busDetailId": "81d4459e-4a54-4f70-80e0-df104953cf62",
+        "dateAndTime": "2025-12-10T14:30:00"
+    },
+    {
+        "busDetailId": "8f171ea1-8b04-4a2f-811f-fb54c11d0ec6",
+        "dateAndTime": "2025-12-11T07:45:00"
+    },
+    {
+        "busDetailId": "9f2c4794-a2cd-4cd4-8bad-e6af4ed79edc",
+        "dateAndTime": "2025-12-11T12:00:00"
+    },
+    {
+        "busDetailId": "af1cce8d-ac45-46d9-9401-4b69955f1a2d",
+        "dateAndTime": "2025-12-11T16:15:00"
+    },
+    {
+        "busDetailId": "b74d25a7-df85-431e-a6f8-7cce87ba796d",
+        "dateAndTime": "2025-12-12T08:30:00"
+    },
+    {
+        "busDetailId": "d78c01a1-70a7-468e-a15d-ad2c79f03c86",
+        "dateAndTime": "2025-12-12T11:45:00"
+    },
+    {
+        "busDetailId": "d7b6763b-a054-445f-94b3-205a2a372b8a",
+        "dateAndTime": "2025-12-12T15:00:00"
+    }
+]

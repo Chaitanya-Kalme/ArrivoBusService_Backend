@@ -1,17 +1,1366 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-  <style>
-    body { font-family: Arial, sans-serif; }
-    .title { font-size: 24px; font-weight: bold; }
-    .content { margin-top: 20px; }
+  <script type="module">import { injectIntoGlobalHook } from "/@react-refresh";
+    injectIntoGlobalHook(window);
+    window.$RefreshReg$ = () => { };
+    window.$RefreshSig$ = () => (type) => type;</script>
+
+  <script type="module" src="/@vite/client"></script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bus Ticket Invoice</title>
+  <style type="text/css" data-vite-dev-id="C:/Users/chait/Downloads/Bus Ticket Invoice/src/index.css">
+    /*! tailwindcss v4.1.3 | MIT License | https://tailwindcss.com */
+    @layer properties {
+      @supports (((-webkit-hyphens: none)) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color: rgb(from red r g b)))) {
+
+        *,
+        :before,
+        :after,
+        ::backdrop {
+          --tw-space-y-reverse: 0;
+          --tw-border-style: solid;
+          --tw-tracking: initial;
+        }
+      }
+    }
+
+    @layer theme {
+
+      :root,
+      :host {
+        --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        --color-orange-600: oklch(.646 .222 41.116);
+        --color-orange-700: oklch(.553 .195 38.402);
+        --color-yellow-50: oklch(.987 .026 102.212);
+        --color-green-600: oklch(.627 .194 149.214);
+        --color-green-700: oklch(.527 .154 150.069);
+        --color-gray-50: oklch(.985 .002 247.839);
+        --color-gray-100: oklch(.967 .003 264.542);
+        --color-gray-300: oklch(.872 .01 258.338);
+        --color-gray-400: oklch(.707 .022 261.325);
+        --color-gray-500: oklch(.551 .027 264.364);
+        --color-gray-600: oklch(.446 .03 256.802);
+        --color-gray-700: oklch(.373 .034 259.733);
+        --color-gray-800: oklch(.278 .033 256.848);
+        --color-white: #fff;
+        --spacing: .25rem;
+        --container-2xl: 42rem;
+        --text-xs: .75rem;
+        --text-xs--line-height: calc(1 / .75);
+        --text-sm: .875rem;
+        --text-sm--line-height: calc(1.25 / .875);
+        --text-base: 1rem;
+        --text-base--line-height: calc(1.5 / 1);
+        --text-lg: 1.125rem;
+        --text-lg--line-height: calc(1.75 / 1.125);
+        --text-xl: 1.25rem;
+        --text-xl--line-height: calc(1.75 / 1.25);
+        --text-2xl: 1.5rem;
+        --font-weight-normal: 400;
+        --font-weight-medium: 500;
+        --tracking-wide: .025em;
+        --tracking-wider: .05em;
+        --default-font-family: var(--font-sans);
+        --default-font-feature-settings: var(--font-sans--font-feature-settings);
+        --default-font-variation-settings: var(--font-sans--font-variation-settings);
+        --default-mono-font-family: var(--font-mono);
+        --default-mono-font-feature-settings: var(--font-mono--font-feature-settings);
+        --default-mono-font-variation-settings: var(--font-mono--font-variation-settings);
+      }
+    }
+
+    @layer base {
+
+      *,
+      :after,
+      :before,
+      ::backdrop {
+        box-sizing: border-box;
+        border: 0 solid;
+        margin: 0;
+        padding: 0;
+      }
+
+      ::file-selector-button {
+        box-sizing: border-box;
+        border: 0 solid;
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      :host {
+        -webkit-text-size-adjust: 100%;
+        tab-size: 4;
+        line-height: 1.5;
+        font-family: var(--default-font-family, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji");
+        font-feature-settings: var(--default-font-feature-settings, normal);
+        font-variation-settings: var(--default-font-variation-settings, normal);
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      body {
+        line-height: inherit;
+      }
+
+      hr {
+        height: 0;
+        color: inherit;
+        border-top-width: 1px;
+      }
+
+      abbr:where([title]) {
+        -webkit-text-decoration: underline dotted;
+        text-decoration: underline dotted;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        font-size: inherit;
+        font-weight: inherit;
+      }
+
+      a {
+        color: inherit;
+        -webkit-text-decoration: inherit;
+        -webkit-text-decoration: inherit;
+        text-decoration: inherit;
+      }
+
+      b,
+      strong {
+        font-weight: bolder;
+      }
+
+      code,
+      kbd,
+      samp,
+      pre {
+        font-family: var(--default-mono-font-family, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);
+        font-feature-settings: var(--default-mono-font-feature-settings, normal);
+        font-variation-settings: var(--default-mono-font-variation-settings, normal);
+        font-size: 1em;
+      }
+
+      small {
+        font-size: 80%;
+      }
+
+      sub,
+      sup {
+        vertical-align: baseline;
+        font-size: 75%;
+        line-height: 0;
+        position: relative;
+      }
+
+      sub {
+        bottom: -.25em;
+      }
+
+      sup {
+        top: -.5em;
+      }
+
+      table {
+        text-indent: 0;
+        border-color: inherit;
+        border-collapse: collapse;
+      }
+
+      :-moz-focusring {
+        outline: auto;
+      }
+
+      progress {
+        vertical-align: baseline;
+      }
+
+      summary {
+        display: list-item;
+      }
+
+      ol,
+      ul,
+      menu {
+        list-style: none;
+      }
+
+      img,
+      svg,
+      video,
+      canvas,
+      audio,
+      iframe,
+      embed,
+      object {
+        vertical-align: middle;
+        display: block;
+      }
+
+      img,
+      video {
+        max-width: 100%;
+        height: auto;
+      }
+
+      button,
+      input,
+      select,
+      optgroup,
+      textarea {
+        font: inherit;
+        font-feature-settings: inherit;
+        font-variation-settings: inherit;
+        letter-spacing: inherit;
+        color: inherit;
+        opacity: 1;
+        background-color: #0000;
+        border-radius: 0;
+      }
+
+      ::file-selector-button {
+        font: inherit;
+        font-feature-settings: inherit;
+        font-variation-settings: inherit;
+        letter-spacing: inherit;
+        color: inherit;
+        opacity: 1;
+        background-color: #0000;
+        border-radius: 0;
+      }
+
+      :where(select:is([multiple], [size])) optgroup {
+        font-weight: bolder;
+      }
+
+      :where(select:is([multiple], [size])) optgroup option {
+        padding-inline-start: 20px;
+      }
+
+      ::file-selector-button {
+        margin-inline-end: 4px;
+      }
+
+      ::placeholder {
+        opacity: 1;
+        color: currentColor;
+      }
+
+      @supports (color: color-mix(in lab, red, red)) {
+        ::placeholder {
+          color: color-mix(in oklab, currentColor 50%, transparent);
+        }
+      }
+
+      textarea {
+        resize: vertical;
+      }
+
+      ::-webkit-search-decoration {
+        -webkit-appearance: none;
+      }
+
+      ::-webkit-date-and-time-value {
+        min-height: 1lh;
+        text-align: inherit;
+      }
+
+      ::-webkit-datetime-edit {
+        display: inline-flex;
+      }
+
+      ::-webkit-datetime-edit-fields-wrapper {
+        padding: 0;
+      }
+
+      ::-webkit-datetime-edit {
+        padding-block: 0;
+      }
+
+      ::-webkit-datetime-edit-year-field {
+        padding-block: 0;
+      }
+
+      ::-webkit-datetime-edit-month-field {
+        padding-block: 0;
+      }
+
+      ::-webkit-datetime-edit-day-field {
+        padding-block: 0;
+      }
+
+      ::-webkit-datetime-edit-hour-field {
+        padding-block: 0;
+      }
+
+      ::-webkit-datetime-edit-minute-field {
+        padding-block: 0;
+      }
+
+      ::-webkit-datetime-edit-second-field {
+        padding-block: 0;
+      }
+
+      ::-webkit-datetime-edit-millisecond-field {
+        padding-block: 0;
+      }
+
+      ::-webkit-datetime-edit-meridiem-field {
+        padding-block: 0;
+      }
+
+      :-moz-ui-invalid {
+        box-shadow: none;
+      }
+
+      button,
+      input:where([type="button"], [type="reset"], [type="submit"]) {
+        appearance: button;
+      }
+
+      ::file-selector-button {
+        appearance: button;
+      }
+
+      ::-webkit-inner-spin-button {
+        height: auto;
+      }
+
+      ::-webkit-outer-spin-button {
+        height: auto;
+      }
+
+      [hidden]:where(:not([hidden="until-found"])) {
+        display: none !important;
+      }
+
+      * {
+        border-color: var(--border);
+        outline-color: var(--ring);
+      }
+
+      @supports (color: color-mix(in lab, red, red)) {
+        * {
+          outline-color: color-mix(in oklab, var(--ring) 50%, transparent);
+        }
+      }
+
+      body {
+        background-color: var(--background);
+        color: var(--foreground);
+      }
+
+      * {
+        border-color: var(--border);
+        outline-color: var(--ring);
+      }
+
+      @supports (color: color-mix(in lab, red, red)) {
+        * {
+          outline-color: color-mix(in oklab, var(--ring) 50%, transparent);
+        }
+      }
+
+      body {
+        background-color: var(--background);
+        color: var(--foreground);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) h1 {
+        font-size: var(--text-2xl);
+        font-weight: var(--font-weight-medium);
+        line-height: 1.5;
+      }
+
+      :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) h2 {
+        font-size: var(--text-xl);
+        font-weight: var(--font-weight-medium);
+        line-height: 1.5;
+      }
+
+      :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) h3 {
+        font-size: var(--text-lg);
+        font-weight: var(--font-weight-medium);
+        line-height: 1.5;
+      }
+
+      :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) h4 {
+        font-size: var(--text-base);
+        font-weight: var(--font-weight-medium);
+        line-height: 1.5;
+      }
+
+      :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) p {
+        font-size: var(--text-base);
+        font-weight: var(--font-weight-normal);
+        line-height: 1.5;
+      }
+
+      :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) label,
+      :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) button {
+        font-size: var(--text-base);
+        font-weight: var(--font-weight-medium);
+        line-height: 1.5;
+      }
+
+      :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) input {
+        font-size: var(--text-base);
+        font-weight: var(--font-weight-normal);
+        line-height: 1.5;
+      }
+    }
+
+    @layer utilities {
+      .m-0 {
+        margin: calc(var(--spacing) * 0);
+      }
+
+      .mx-auto {
+        margin-inline: auto;
+      }
+
+      .mt-0\.5 {
+        margin-top: calc(var(--spacing) * .5);
+      }
+
+      .mt-1 {
+        margin-top: calc(var(--spacing) * 1);
+      }
+
+      .mt-2 {
+        margin-top: calc(var(--spacing) * 2);
+      }
+
+      .mt-3 {
+        margin-top: calc(var(--spacing) * 3);
+      }
+
+      .mb-1\.5 {
+        margin-bottom: calc(var(--spacing) * 1.5);
+      }
+
+      .mb-2 {
+        margin-bottom: calc(var(--spacing) * 2);
+      }
+
+      .mb-3 {
+        margin-bottom: calc(var(--spacing) * 3);
+      }
+
+      .ml-2 {
+        margin-left: calc(var(--spacing) * 2);
+      }
+
+      .flex {
+        display: flex;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      .inline-block {
+        display: inline-block;
+      }
+
+      .table {
+        display: table;
+      }
+
+      .h-3 {
+        height: calc(var(--spacing) * 3);
+      }
+
+      .h-3\.5 {
+        height: calc(var(--spacing) * 3.5);
+      }
+
+      .h-4 {
+        height: calc(var(--spacing) * 4);
+      }
+
+      .h-auto {
+        height: auto;
+      }
+
+      .min-h-screen {
+        min-height: 100vh;
+      }
+
+      .w-1\/3 {
+        width: 33.3333%;
+      }
+
+      .w-2\/5 {
+        width: 40%;
+      }
+
+      .w-3 {
+        width: calc(var(--spacing) * 3);
+      }
+
+      .w-3\.5 {
+        width: calc(var(--spacing) * 3.5);
+      }
+
+      .w-4 {
+        width: calc(var(--spacing) * 4);
+      }
+
+      .w-full {
+        width: 100%;
+      }
+
+      .max-w-2xl {
+        max-width: var(--container-2xl);
+      }
+
+      .max-w-\[200px\] {
+        max-width: 200px;
+      }
+
+      .flex-shrink-0 {
+        flex-shrink: 0;
+      }
+
+      .flex-col {
+        flex-direction: column;
+      }
+
+      .flex-wrap {
+        flex-wrap: wrap;
+      }
+
+      .items-center {
+        align-items: center;
+      }
+
+      .items-start {
+        align-items: flex-start;
+      }
+
+      .justify-between {
+        justify-content: space-between;
+      }
+
+      .gap-1 {
+        gap: calc(var(--spacing) * 1);
+      }
+
+      .gap-1\.5 {
+        gap: calc(var(--spacing) * 1.5);
+      }
+
+      .gap-2 {
+        gap: calc(var(--spacing) * 2);
+      }
+
+      :where(.space-y-1 > :not(:last-child)) {
+        --tw-space-y-reverse: 0;
+        margin-block-start: calc(calc(var(--spacing) * 1) * var(--tw-space-y-reverse));
+        margin-block-end: calc(calc(var(--spacing) * 1) * calc(1 - var(--tw-space-y-reverse)));
+      }
+
+      .rounded {
+        border-radius: .25rem;
+      }
+
+      .border {
+        border-style: var(--tw-border-style);
+        border-width: 1px;
+      }
+
+      .border-2 {
+        border-style: var(--tw-border-style);
+        border-width: 2px;
+      }
+
+      .border-t {
+        border-top-style: var(--tw-border-style);
+        border-top-width: 1px;
+      }
+
+      .border-b {
+        border-bottom-style: var(--tw-border-style);
+        border-bottom-width: 1px;
+      }
+
+      .border-b-2 {
+        border-bottom-style: var(--tw-border-style);
+        border-bottom-width: 2px;
+      }
+
+      .border-dashed {
+        --tw-border-style: dashed;
+        border-style: dashed;
+      }
+
+      .border-gray-300 {
+        border-color: var(--color-gray-300);
+      }
+
+      .border-gray-400 {
+        border-color: var(--color-gray-400);
+      }
+
+      .border-gray-800 {
+        border-color: var(--color-gray-800);
+      }
+
+      .bg-gray-50 {
+        background-color: var(--color-gray-50);
+      }
+
+      .bg-gray-100 {
+        background-color: var(--color-gray-100);
+      }
+
+      .bg-green-600 {
+        background-color: var(--color-green-600);
+      }
+
+      .bg-orange-600 {
+        background-color: var(--color-orange-600);
+      }
+
+      .bg-white {
+        background-color: var(--color-white);
+      }
+
+      .bg-yellow-50 {
+        background-color: var(--color-yellow-50);
+      }
+
+      .p-2 {
+        padding: calc(var(--spacing) * 2);
+      }
+
+      .px-2 {
+        padding-inline: calc(var(--spacing) * 2);
+      }
+
+      .px-3 {
+        padding-inline: calc(var(--spacing) * 3);
+      }
+
+      .px-4 {
+        padding-inline: calc(var(--spacing) * 4);
+      }
+
+      .py-1 {
+        padding-block: calc(var(--spacing) * 1);
+      }
+
+      .py-1\.5 {
+        padding-block: calc(var(--spacing) * 1.5);
+      }
+
+      .py-2 {
+        padding-block: calc(var(--spacing) * 2);
+      }
+
+      .py-3 {
+        padding-block: calc(var(--spacing) * 3);
+      }
+
+      .py-8 {
+        padding-block: calc(var(--spacing) * 8);
+      }
+
+      .pt-2 {
+        padding-top: calc(var(--spacing) * 2);
+      }
+
+      .pt-3 {
+        padding-top: calc(var(--spacing) * 3);
+      }
+
+      .text-center {
+        text-align: center;
+      }
+
+      .text-right {
+        text-align: right;
+      }
+
+      .text-base {
+        font-size: var(--text-base);
+        line-height: var(--tw-leading, var(--text-base--line-height));
+      }
+
+      .text-lg {
+        font-size: var(--text-lg);
+        line-height: var(--tw-leading, var(--text-lg--line-height));
+      }
+
+      .text-xs {
+        font-size: var(--text-xs);
+        line-height: var(--tw-leading, var(--text-xs--line-height));
+      }
+
+      .tracking-wide {
+        --tw-tracking: var(--tracking-wide);
+        letter-spacing: var(--tracking-wide);
+      }
+
+      .tracking-wider {
+        --tw-tracking: var(--tracking-wider);
+        letter-spacing: var(--tracking-wider);
+      }
+
+      .break-all {
+        word-break: break-all;
+      }
+
+      .text-gray-500 {
+        color: var(--color-gray-500);
+      }
+
+      .text-gray-600 {
+        color: var(--color-gray-600);
+      }
+
+      .text-gray-700 {
+        color: var(--color-gray-700);
+      }
+
+      .text-green-600 {
+        color: var(--color-green-600);
+      }
+
+      .text-green-700 {
+        color: var(--color-green-700);
+      }
+
+      .text-orange-600 {
+        color: var(--color-orange-600);
+      }
+
+      .text-white {
+        color: var(--color-white);
+      }
+
+      .uppercase {
+        text-transform: uppercase;
+      }
+
+      .opacity-90 {
+        opacity: .9;
+      }
+
+      @media (hover: hover) {
+        .hover\:bg-gray-50:hover {
+          background-color: var(--color-gray-50);
+        }
+      }
+
+      @media (hover: hover) {
+        .hover\:bg-green-700:hover {
+          background-color: var(--color-green-700);
+        }
+      }
+
+      @media (hover: hover) {
+        .hover\:bg-orange-700:hover {
+          background-color: var(--color-orange-700);
+        }
+      }
+
+      @media (width >=40rem) {
+        .sm\:m-4 {
+          margin: calc(var(--spacing) * 4);
+        }
+      }
+
+      @media (width >=40rem) {
+        .sm\:grid {
+          display: grid;
+        }
+      }
+
+      @media (width >=40rem) {
+        .sm\:inline {
+          display: inline;
+        }
+      }
+
+      @media (width >=40rem) {
+        .sm\:h-3\.5 {
+          height: calc(var(--spacing) * 3.5);
+        }
+      }
+
+      @media (width >=40rem) {
+        .sm\:h-4 {
+          height: calc(var(--spacing) * 4);
+        }
+      }
+
+      @media (width >=40rem) {
+        .sm\:h-5 {
+          height: calc(var(--spacing) * 5);
+        }
+      }
+
+      @media (width >=40rem) {
+        .sm\:min-h-0 {
+          min-height: calc(var(--spacing) * 0);
+        }
+      }
+
+      @media (width >=40rem) {
+        .sm\:w-1\/3 {
+          width: 33.3333%;
+        }
+      }
+
+      @media (width >=40rem) {
+        .sm\:w-3\.5 {
+          width: calc(var(--spacing) * 3.5);
+        }
+      }
+
+      @media (width >=40rem) {
+        .sm\:w-4 {
+          width: calc(var(--spacing) * 4);
+        }
+      }
+
+      @media (width >=40rem) {
+        .sm\:w-5 {
+          width: calc(var(--spacing) * 5);
+        }
+      }
+
+      @media (width >=40rem) {
+        .sm\:max-w-\[220px\] {
+          max-width: 220px;
+        }
+      }
+
+      @media (width >=40rem) {
+        .sm\:grid-cols-2 {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (width >=40rem) {
+        .sm\:flex-row {
+          flex-direction: row;
+        }
+      }
+
+      @media (width >=40rem) {
+        .sm\:items-center {
+          align-items: center;
+        }
+      }
+
+      @media (width >=40rem) {
+        .sm\:gap-2 {
+          gap: calc(var(--spacing) * 2);
+        }
+      }
+
+      @media (width >=40rem) {
+        .sm\:gap-4 {
+          gap: calc(var(--spacing) * 4);
+        }
+      }
+
+      @media (width >=40rem) {
+        .sm\:p-3 {
+          padding: calc(var(--spacing) * 3);
+        }
+      }
+
+      @media (width >=40rem) {
+        .sm\:px-3 {
+          padding-inline: calc(var(--spacing) * 3);
+        }
+      }
+
+      @media (width >=40rem) {
+        .sm\:px-4 {
+          padding-inline: calc(var(--spacing) * 4);
+        }
+      }
+
+      @media (width >=40rem) {
+        .sm\:py-1\.5 {
+          padding-block: calc(var(--spacing) * 1.5);
+        }
+      }
+
+      @media (width >=40rem) {
+        .sm\:py-2 {
+          padding-block: calc(var(--spacing) * 2);
+        }
+      }
+
+      @media (width >=40rem) {
+        .sm\:py-3 {
+          padding-block: calc(var(--spacing) * 3);
+        }
+      }
+
+      @media (width >=40rem) {
+        .sm\:py-4 {
+          padding-block: calc(var(--spacing) * 4);
+        }
+      }
+
+      @media (width >=40rem) {
+        .sm\:text-right {
+          text-align: right;
+        }
+      }
+
+      @media (width >=40rem) {
+        .sm\:text-lg {
+          font-size: var(--text-lg);
+          line-height: var(--tw-leading, var(--text-lg--line-height));
+        }
+      }
+
+      @media (width >=40rem) {
+        .sm\:text-sm {
+          font-size: var(--text-sm);
+          line-height: var(--tw-leading, var(--text-sm--line-height));
+        }
+      }
+
+      @media (width >=40rem) {
+        .sm\:text-xl {
+          font-size: var(--text-xl);
+          line-height: var(--tw-leading, var(--text-xl--line-height));
+        }
+      }
+
+      @media print {
+        .print\:hidden {
+          display: none;
+        }
+      }
+    }
+
+    :root {
+      --font-size: 16px;
+      --background: #fff;
+      --foreground: oklch(.145 0 0);
+      --card: #fff;
+      --card-foreground: oklch(.145 0 0);
+      --popover: oklch(1 0 0);
+      --popover-foreground: oklch(.145 0 0);
+      --primary: #030213;
+      --primary-foreground: oklch(1 0 0);
+      --secondary: oklch(.95 .0058 264.53);
+      --secondary-foreground: #030213;
+      --muted: #ececf0;
+      --muted-foreground: #717182;
+      --accent: #e9ebef;
+      --accent-foreground: #030213;
+      --destructive: #d4183d;
+      --destructive-foreground: #fff;
+      --border: #0000001a;
+      --input: transparent;
+      --input-background: #f3f3f5;
+      --switch-background: #cbced4;
+      --font-weight-medium: 500;
+      --font-weight-normal: 400;
+      --ring: oklch(.708 0 0);
+      --chart-1: oklch(.646 .222 41.116);
+      --chart-2: oklch(.6 .118 184.704);
+      --chart-3: oklch(.398 .07 227.392);
+      --chart-4: oklch(.828 .189 84.429);
+      --chart-5: oklch(.769 .188 70.08);
+      --radius: .625rem;
+      --sidebar: oklch(.985 0 0);
+      --sidebar-foreground: oklch(.145 0 0);
+      --sidebar-primary: #030213;
+      --sidebar-primary-foreground: oklch(.985 0 0);
+      --sidebar-accent: oklch(.97 0 0);
+      --sidebar-accent-foreground: oklch(.205 0 0);
+      --sidebar-border: oklch(.922 0 0);
+      --sidebar-ring: oklch(.708 0 0);
+    }
+
+    .dark {
+      --background: oklch(.145 0 0);
+      --foreground: oklch(.985 0 0);
+      --card: oklch(.145 0 0);
+      --card-foreground: oklch(.985 0 0);
+      --popover: oklch(.145 0 0);
+      --popover-foreground: oklch(.985 0 0);
+      --primary: oklch(.985 0 0);
+      --primary-foreground: oklch(.205 0 0);
+      --secondary: oklch(.269 0 0);
+      --secondary-foreground: oklch(.985 0 0);
+      --muted: oklch(.269 0 0);
+      --muted-foreground: oklch(.708 0 0);
+      --accent: oklch(.269 0 0);
+      --accent-foreground: oklch(.985 0 0);
+      --destructive: oklch(.396 .141 25.723);
+      --destructive-foreground: oklch(.637 .237 25.331);
+      --border: oklch(.269 0 0);
+      --input: oklch(.269 0 0);
+      --ring: oklch(.439 0 0);
+      --font-weight-medium: 500;
+      --font-weight-normal: 400;
+      --chart-1: oklch(.488 .243 264.376);
+      --chart-2: oklch(.696 .17 162.48);
+      --chart-3: oklch(.769 .188 70.08);
+      --chart-4: oklch(.627 .265 303.9);
+      --chart-5: oklch(.645 .246 16.439);
+      --sidebar: oklch(.205 0 0);
+      --sidebar-foreground: oklch(.985 0 0);
+      --sidebar-primary: oklch(.488 .243 264.376);
+      --sidebar-primary-foreground: oklch(.985 0 0);
+      --sidebar-accent: oklch(.269 0 0);
+      --sidebar-accent-foreground: oklch(.985 0 0);
+      --sidebar-border: oklch(.269 0 0);
+      --sidebar-ring: oklch(.439 0 0);
+    }
+
+    html {
+      font-size: var(--font-size);
+    }
+
+    @media print {
+      @page {
+        size: auto;
+        margin: 0;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      .print\:hidden {
+        display: none !important;
+      }
+
+      div[style*="maxWidth"] {
+        max-width: 100% !important;
+        margin: 0 !important;
+      }
+    }
+
+    @property --tw-space-y-reverse {
+      syntax: "*";
+      inherits: false;
+      initial-value: 0;
+    }
+
+    @property --tw-border-style {
+      syntax: "*";
+      inherits: false;
+      initial-value: solid;
+    }
+
+    @property --tw-tracking {
+      syntax: "*";
+      inherits: false
+    }
   </style>
+  <link type="text/css" rel="stylesheet"
+    href="chrome-extension://fheoggkfdfchfphceeifdbepaooicaho/css/mcafee_fonts.css">
 </head>
+
 <body>
-  <div class="title">Invoice for {{name}}</div>
-  <div class="content">
-    <p>Email: {{email}}</p>
-    <p>Amount: ₹{{amount}}</p>
+  <div id="root">
+    <div class="min-h-screen bg-gray-100 py-8 px-4">
+      <div class="max-w-2xl mx-auto">
+        <div class="bg-white w-full min-h-screen sm:min-h-0" style="max-width: 600px; margin: 0px auto;">
+          <div
+            class="bg-gray-100 px-3 sm:px-4 py-2 border-b border-gray-300 print:hidden flex items-center justify-between flex-wrap gap-2"
+            style="display: flex;"><span class="text-xs sm:text-sm text-gray-700">Ticket Confirmed</span>
+            <div class="flex gap-1.5 sm:gap-2"><button
+                class="flex items-center gap-1 px-2 sm:px-3 py-1 bg-white border border-gray-300 rounded text-xs sm:text-sm hover:bg-gray-50"><svg
+                  xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="lucide lucide-printer w-3 h-3 sm:w-3.5 sm:h-3.5" aria-hidden="true">
+                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                  <path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"></path>
+                  <rect x="6" y="14" width="12" height="8" rx="1"></rect>
+                </svg><span class="hidden sm:inline">Print</span></button><button
+                class="flex items-center gap-1 px-2 sm:px-3 py-1 bg-orange-600 text-white rounded text-xs sm:text-sm hover:bg-orange-700"><svg
+                  xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="lucide lucide-download w-3 h-3 sm:w-3.5 sm:h-3.5" aria-hidden="true">
+                  <path d="M12 15V3"></path>
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <path d="m7 10 5 5 5-5"></path>
+                </svg><span class="hidden sm:inline">Download</span></button><button
+                class="flex items-center gap-1 px-2 sm:px-3 py-1 bg-green-600 text-white rounded text-xs sm:text-sm hover:bg-green-700"><svg
+                  xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                  class="lucide lucide-share2 lucide-share-2 w-3 h-3 sm:w-3.5 sm:h-3.5" aria-hidden="true">
+                  <circle cx="18" cy="5" r="3"></circle>
+                  <circle cx="6" cy="12" r="3"></circle>
+                  <circle cx="18" cy="19" r="3"></circle>
+                  <line x1="8.59" x2="15.42" y1="13.51" y2="17.49"></line>
+                  <line x1="15.41" x2="8.59" y1="6.51" y2="10.49"></line>
+                </svg><span class="hidden sm:inline">Share</span></button></div>
+          </div>
+          <div class="border-2 border-gray-800 m-0 sm:m-4">
+            <div class="border-b-2 border-gray-800 px-3 sm:px-4 py-2 sm:py-3 bg-orange-600 text-white">
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-1.5 sm:gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24"
+                    height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-bus w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" aria-hidden="true">
+                    <path d="M8 6v6"></path>
+                    <path d="M15 6v6"></path>
+                    <path d="M2 12h19.6"></path>
+                    <path
+                      d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3">
+                    </path>
+                    <circle cx="7" cy="18" r="2"></circle>
+                    <path d="M9 18h5"></path>
+                    <circle cx="16" cy="18" r="2"></circle>
+                  </svg>
+                  <div>
+                    <h1 class="text-base sm:text-lg">VRL Travels</h1>
+                    <p class="text-xs opacity-90">E-Ticket cum Invoice</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <p class="text-xs opacity-90">Booking ID</p>
+                  <p class="text-xs sm:text-sm tracking-wide">RDBUS24751283</p>
+                </div>
+              </div>
+            </div>
+            <div
+              class="border-b border-gray-800 px-3 sm:px-4 py-1.5 bg-green-600 text-white flex items-center justify-between text-xs sm:text-sm">
+              <div class="flex items-center gap-1.5 sm:gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24"
+                  height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield w-3 h-3 sm:w-3.5 sm:h-3.5"
+                  aria-hidden="true">
+                  <path
+                    d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z">
+                  </path>
+                </svg><span>CONFIRMED</span></div><span>PNR: MH15AC9876</span>
+            </div>
+            <div class="border-b-2 border-dashed border-gray-400 px-3 sm:px-4 py-3 sm:py-4">
+              <table class="w-full text-xs sm:text-sm">
+                <tbody>
+                  <tr>
+                    <td class="py-1.5 sm:py-2 text-gray-600 w-2/5 sm:w-1/3">From:</td>
+                    <td class="py-1.5 sm:py-2"><span class="text-base sm:text-lg">MUM</span> - Mumbai Central</td>
+                  </tr>
+                  <tr>
+                    <td class="py-1.5 sm:py-2 text-gray-600">To:</td>
+                    <td class="py-1.5 sm:py-2"><span class="text-base sm:text-lg">PNE</span> - Pune Swargate</td>
+                  </tr>
+                  <tr>
+                    <td class="py-1.5 sm:py-2 text-gray-600">Date of Journey:</td>
+                    <td class="py-1.5 sm:py-2">15 Dec 2025</td>
+                  </tr>
+                  <tr>
+                    <td class="py-1.5 sm:py-2 text-gray-600">Departure Time:</td>
+                    <td class="py-1.5 sm:py-2">06:30 AM</td>
+                  </tr>
+                  <tr>
+                    <td class="py-1.5 sm:py-2 text-gray-600">Arrival Time:</td>
+                    <td class="py-1.5 sm:py-2">10:00 AM</td>
+                  </tr>
+                  <tr>
+                    <td class="py-1.5 sm:py-2 text-gray-600">Duration:</td>
+                    <td class="py-1.5 sm:py-2">3h 30m</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="border-b-2 border-dashed border-gray-400 px-3 sm:px-4 py-3 sm:py-4">
+              <p class="text-xs text-gray-600 uppercase mb-2">Passenger Details</p>
+              <table class="w-full text-xs sm:text-sm">
+                <tbody>
+                  <tr>
+                    <td class="py-1 sm:py-1.5 text-gray-600 w-2/5 sm:w-1/3">Name:</td>
+                    <td class="py-1 sm:py-1.5">Rajesh Kumar Sharma</td>
+                  </tr>
+                  <tr>
+                    <td class="py-1 sm:py-1.5 text-gray-600">Age/Gender:</td>
+                    <td class="py-1 sm:py-1.5">32 / M</td>
+                  </tr>
+                  <tr>
+                    <td class="py-1 sm:py-1.5 text-gray-600">Seat Number:</td>
+                    <td class="py-1 sm:py-1.5"><span class="text-lg sm:text-xl text-orange-600">12A</span><span
+                        class="text-gray-500 ml-2">(AC Sleeper)</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="border-b border-gray-800 px-3 sm:px-4 py-2 sm:py-3 bg-gray-50">
+              <table class="w-full text-xs sm:text-sm">
+                <tbody>
+                  <tr>
+                    <td class="py-1 text-gray-600 w-2/5 sm:w-1/3">Bus Type:</td>
+                    <td class="py-1">Volvo Multi-Axle A/C Sleeper (2+1)</td>
+                  </tr>
+                  <tr>
+                    <td class="py-1 text-gray-600">Bus Number:</td>
+                    <td class="py-1">MH-12-AX-5423</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="border-b-2 border-dashed border-gray-400 px-3 sm:px-4 py-3 sm:py-4">
+              <div class="mb-3">
+                <p class="text-xs text-gray-600 uppercase mb-1.5">Boarding Point</p>
+                <div class="flex items-start gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-map-pin w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-600 mt-0.5 flex-shrink-0"
+                    aria-hidden="true">
+                    <path
+                      d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0">
+                    </path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                  </svg>
+                  <div class="text-xs sm:text-sm">
+                    <p>Mumbai Central Bus Stand, Gate 5</p>
+                    <p class="text-green-700 mt-1">Report by: 06:15 AM</p>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <p class="text-xs text-gray-600 uppercase mb-1.5">Dropping Point</p>
+                <div class="flex items-start gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-map-pin w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-600 mt-0.5 flex-shrink-0"
+                    aria-hidden="true">
+                    <path
+                      d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0">
+                    </path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                  </svg>
+                  <p class="text-xs sm:text-sm">Pune Swargate, Platform 3</p>
+                </div>
+              </div>
+            </div>
+            <div class="border-b border-gray-800 px-3 sm:px-4 py-2 sm:py-3">
+              <p class="text-xs text-gray-600 uppercase mb-2">Fare Details</p>
+              <table class="w-full text-xs sm:text-sm">
+                <tbody>
+                  <tr>
+                    <td class="py-1 text-gray-600">Base Fare:</td>
+                    <td class="py-1 text-right">₹850.00</td>
+                  </tr>
+                  <tr>
+                    <td class="py-1 text-gray-600">GST (5%):</td>
+                    <td class="py-1 text-right">₹42.50</td>
+                  </tr>
+                  <tr>
+                    <td class="py-1 text-gray-600">Service Fee:</td>
+                    <td class="py-1 text-right">₹25.00</td>
+                  </tr>
+                  <tr>
+                    <td class="py-1 text-green-600">Discount:</td>
+                    <td class="py-1 text-right text-green-600">- ₹50.00</td>
+                  </tr>
+                  <tr class="border-t border-gray-300">
+                    <td class="py-2 pt-2 text-xs sm:text-sm"><strong>Total Amount Paid:</strong></td>
+                    <td class="py-2 text-right pt-2"><strong
+                        class="text-base sm:text-lg text-orange-600">₹867.50</strong></td>
+                  </tr>
+                </tbody>
+              </table>
+              <div
+                class="mt-3 pt-3 border-t border-gray-300 flex flex-col sm:grid sm:grid-cols-2 gap-2 sm:gap-4 text-xs text-gray-600">
+                <div><span>GSTIN:</span> 27AABCU9603R1ZM</div>
+                <div class="sm:text-right"><span>Payment:</span> UPI - UPI2412075423</div>
+              </div>
+            </div>
+            <div class="border-b-2 border-dashed border-gray-400 px-3 sm:px-4 py-3 sm:py-4 text-center bg-gray-50">
+              <p class="text-xs text-gray-600 mb-2 uppercase">E-Ticket Barcode</p>
+              <div class="bg-white inline-block p-2 sm:p-3 border border-gray-300"><svg width="200" height="60"
+                  viewBox="0 0 220 60" class="w-full h-auto max-w-[200px] sm:max-w-[220px]">
+                  <rect x="0" y="0" width="6" height="50" fill="black"></rect>
+                  <rect x="10" y="0" width="3" height="50" fill="black"></rect>
+                  <rect x="20" y="0" width="4" height="50" fill="black"></rect>
+                  <rect x="30" y="0" width="6" height="50" fill="black"></rect>
+                  <rect x="40" y="0" width="4" height="50" fill="black"></rect>
+                  <rect x="50" y="0" width="3" height="50" fill="black"></rect>
+                  <rect x="60" y="0" width="6" height="50" fill="black"></rect>
+                  <rect x="70" y="0" width="3" height="50" fill="black"></rect>
+                  <rect x="80" y="0" width="4" height="50" fill="black"></rect>
+                  <rect x="90" y="0" width="6" height="50" fill="black"></rect>
+                  <rect x="100" y="0" width="4" height="50" fill="black"></rect>
+                  <rect x="110" y="0" width="3" height="50" fill="black"></rect>
+                  <rect x="120" y="0" width="6" height="50" fill="black"></rect>
+                  <rect x="130" y="0" width="3" height="50" fill="black"></rect>
+                  <rect x="140" y="0" width="4" height="50" fill="black"></rect>
+                  <rect x="150" y="0" width="6" height="50" fill="black"></rect>
+                  <rect x="160" y="0" width="4" height="50" fill="black"></rect>
+                  <rect x="170" y="0" width="3" height="50" fill="black"></rect>
+                  <rect x="180" y="0" width="6" height="50" fill="black"></rect>
+                  <rect x="190" y="0" width="3" height="50" fill="black"></rect>
+                  <rect x="200" y="0" width="4" height="50" fill="black"></rect>
+                  <rect x="210" y="0" width="6" height="50" fill="black"></rect>
+                </svg></div>
+              <p class="text-xs text-gray-600 mt-2 tracking-wider break-all">RDBUS24751283</p>
+            </div>
+            <div class="border-b border-gray-800 px-3 sm:px-4 py-2 sm:py-3 bg-yellow-50">
+              <p class="text-xs mb-2"><strong>महत्वपूर्ण सूचना / Important Instructions:</strong></p>
+              <ul class="text-xs text-gray-700 space-y-1">
+                <li>• Report 15 minutes before departure with valid Photo ID</li>
+                <li>• Carry Aadhar/PAN/DL/Passport for verification</li>
+                <li>• Cancellation allowed up to 6 hours before departure</li>
+                <li>• Computer generated ticket, signature not required</li>
+              </ul>
+            </div>
+            <div class="px-3 sm:px-4 py-2 sm:py-3 bg-gray-50 border-b border-gray-800">
+              <div
+                class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs text-gray-700">
+                <div class="flex items-center gap-1.5 sm:gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24"
+                    height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-phone w-3 h-3 flex-shrink-0"
+                    aria-hidden="true">
+                    <path
+                      d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384">
+                    </path>
+                  </svg><span>+91 98765 43210</span></div>
+                <div class="flex items-center gap-1.5 sm:gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24"
+                    height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mail w-3 h-3 flex-shrink-0"
+                    aria-hidden="true">
+                    <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"></path>
+                    <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                  </svg><span class="break-all">support@vrltravels.com</span></div>
+              </div>
+            </div>
+            <div class="px-3 sm:px-4 py-2 bg-gray-100 text-center">
+              <p class="text-xs text-gray-600">Booked on: 7 Dec 2025, 02:30 PM</p>
+              <p class="text-xs text-gray-600 mt-1">Thank you for choosing VRL Travels | सुरक्षित यात्रा करें!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="/src/main.tsx"></script>
+
+
+  <span id="PING_CONTENT_DLS_POPUP" style="display: none;"></span>
+  <div
+    style="background-color: transparent; border: none; bottom: 15px; display: block; margin: 0px; opacity: 1; padding: 0px; position: fixed; right: 15px; z-index: 2147483647;">
   </div>
 </body>
+
 </html>

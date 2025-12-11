@@ -78,13 +78,13 @@ export async function registerUser(req: Request, res: Response) {
 export async function sendVerificationEmail(req: Request, res: Response) {
     try {
         // Fetching the user id from the frontend and check it is exist or not. 
-        const { userId,type } = req.body
+        const { userId,type,email } = req.body
 
-        if (!userId) {
+        if (!userId && !email) {
             return res.status(404)
                 .json({
                     success: false,
-                    message: "User id is required to send the email."
+                    message: "Any field is required to send the email."
                 })
         }
 
@@ -99,7 +99,10 @@ export async function sendVerificationEmail(req: Request, res: Response) {
         // Check user is exists or not. 
         const user = await prisma.user.findFirst({
             where: {
-                id: userId
+                OR:[
+                    {id: userId || undefined},
+                    {email: email}
+                ]
             }
         })
 
@@ -109,14 +112,6 @@ export async function sendVerificationEmail(req: Request, res: Response) {
                     success: false,
                     message: "User does not exists"
                 })
-        }
-
-        if(user.isVerified){
-            return res.status(400)
-            .json({
-                success: false,
-                message: "User already verified"
-            })
         }
 
         // Email Sending function call 
@@ -132,10 +127,12 @@ export async function sendVerificationEmail(req: Request, res: Response) {
 
         return res.status(200).json({
             success: true,
-            message: "Email sended successfully"
+            message: "Email sended successfully",
+            userId: user.id
         })
 
     } catch (error: any) {
+        console.log(error)
         return res.status(500)
             .json({
                 success: false,
@@ -402,7 +399,6 @@ export async function updatePassword(req: Request, res: Response){
                 message: "User id is required"
             })
         }
-        console.log(req.user)
         if(userId!==req.user.id){
             return res.status(400)
             .json({
@@ -413,6 +409,7 @@ export async function updatePassword(req: Request, res: Response){
 
         // Check that the newPassword and confirm Password is provided or not. 
         const {oldPassword, newPassword,confirmPassword} = req.body
+
         if(!oldPassword || !newPassword || !confirmPassword){
             return res.status(404)
             .json({
@@ -468,6 +465,134 @@ export async function updatePassword(req: Request, res: Response){
         .json({
             success: false,
             message: error.message || "Server Error while updating the password"
+        })
+        
+    }
+}
+
+
+export async function verifyResetPasswordCode(req: Request, res: Response){
+    try {
+        const {userId, resetPasswordCode} = req.body
+
+        if(!userId || !resetPassword){
+            return res.status(404)
+            .json({
+                success: false,
+                message: "OTP and other userId is required"
+            })
+        }
+
+        //  Check that user exist or not.
+        const user = await prisma.user.findFirst({
+            where:{
+                id: userId
+            }
+        })
+
+        if(!user){
+            return res.status(400)
+            .json({
+                success: false,
+                message: "User does not exist with this user id."
+            })
+        }
+
+        // Now check that the user otp and resetPassword code is valid or not.
+        if(!user.resetPasswordCodeExpiry || !user.resetPasswordCode  || new Date(Date.now())> user.resetPasswordCodeExpiry){
+            return res.status(400)
+            .json({
+                success: false,
+                message: "OTP is invalid. Please generate new one"
+            })
+        }
+
+        if(user.resetPasswordCode!==resetPasswordCode){
+            return res.status(400)
+            .json({
+                success: false,
+                message: "OTP is incorrect."
+            })
+        }
+
+
+        return res.status(200)
+        .json({
+            success: true,
+            message: "OTP verified successfully"
+        })
+        
+    } catch (error:any) {
+        console.log(error)
+        return res.status(500)
+        .json({
+            success: false,
+            message: error.message || "Error while verifing otp"
+        })
+        
+    }
+}
+
+export async function resetPassword(req: Request, res: Response){
+    try {
+        const {userId,newPassword} = req.body
+
+        if(!userId || !newPassword){
+            return res.status(404)
+            .json({
+                success: false,
+                messagee: "User id and newPassword is required"
+            })
+        }
+        
+         //  Check that user exist or not.
+        const user = await prisma.user.findFirst({
+            where:{
+                id: userId
+            }
+        })
+
+        if(!user){
+            return res.status(400)
+            .json({
+                success: false,
+                message: "User does not exist with this user id."
+            })
+        }
+        
+        const newHashedPasword = await bcrypt.hash(newPassword, 10)
+
+        if(!newHashedPasword){
+            return res.status(500)
+            .json({
+                success: false,
+                message: "Internal Server Error"
+            })
+        }
+
+        const updatedUser = await prisma.user.update({
+            where:{
+                id: user.id
+            },
+            data:{
+                password: newHashedPasword,
+                resetPasswordCode: null,
+                resetPasswordCodeExpiry: null
+            }
+        })
+        
+        return res.status(200)
+        .json({
+            success: true,
+            message: "Password updated successfully"
+        })
+        
+    } catch (error:any) {
+        console.log(error)
+        return res.status(500)
+        .json({
+            success: false,
+            message: error.message || "Server error while reset password"
         })
         
     }
