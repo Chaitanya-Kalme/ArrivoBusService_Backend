@@ -188,9 +188,9 @@ export async function getHomePageBusDetails(req: Request, res: Response) {
 export async function createBusTrip(req: Request, res: Response) {
     try {
         // Get the bus details id, date and time from frontend.
-        const { busDetailId, dateAndTime } = req.body
+        const { busDetailId, dateAndTime,driverId } = req.body
 
-        if (!busDetailId || !dateAndTime) {
+        if (!busDetailId || !dateAndTime || !driverId) {
             return res.status(404)
                 .json({
                     success: false,
@@ -228,6 +228,22 @@ export async function createBusTrip(req: Request, res: Response) {
                     message: "bus already exist with this date and time and busDetailsId"
                 })
         }
+
+        // Check that driver exist or not.
+        const driver = await prisma.driver.findFirst({
+            where:{
+                id: driverId
+            }
+        })
+
+        if(!driver){
+            return res.status(400)
+            .json({
+                success: false,
+                message: "Driver does not exist with this id."
+            })
+        }
+
         // Now Create the seat matrix for the bus. 
         const seatMatrix: boolean[] = Array(isBusDetailsExist.totalSeats).fill(false)
 
@@ -238,7 +254,8 @@ export async function createBusTrip(req: Request, res: Response) {
             data: {
                 busDetailsId: busDetailId,
                 dateAndTime: dateTime.toISOString(),
-                seatMatrix: seatMatrix
+                seatMatrix: seatMatrix,
+                driverId: driverId
             }
         })
 

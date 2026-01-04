@@ -7,7 +7,9 @@ import handlebars from "handlebars";
 import fs from "fs-extra"
 import { fileURLToPath } from "url";
 import nodemailer from "nodemailer"
-import type { Bus } from "./bus.controller";
+import type { Bus, busStop } from "./bus.controller";
+import Razorpay from "razorpay";
+import { confirmBooking } from "../webhook/razorpay.webook";
 
 // 📌 We have to ensure that if the ticket is already booked then we have to book the another seat. 
 
@@ -18,6 +20,11 @@ type passenger = {
     age: number,
     gender: String,
 }
+
+const razorpay = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID!,
+    key_secret: process.env.RAZORPAY_KEY_SECRET!
+})
 
 
 export async function registerBooking(req: Request, res: Response) {
@@ -34,7 +41,7 @@ export async function registerBooking(req: Request, res: Response) {
         }
 
         //  Now check that data taken from the frontend. 
-        const { busId, passengersList, emailId, phoneNo, emergencyContactNumber, boardingStationId, destinationStopId, amountPaid,seatsBooked } = req.body
+        const { busId, passengersList, emailId, phoneNo, emergencyContactNumber, boardingStationId, destinationStopId, amountPaid, seatsBooked } = req.body
 
         if (!busId || !passengersList || !emailId || !phoneNo || !boardingStationId || !destinationStopId || !amountPaid || !seatsBooked) {
             return res.status(404)
@@ -69,14 +76,25 @@ export async function registerBooking(req: Request, res: Response) {
         // Check boarding station id exist with this bus. 
         const busStopList = isBusExist.busDetails.stops
 
-        const isBoardingStopExist = busStopList.some(stop => stop.id === parseInt(boardingStationId))
-        const isDestinationStopExist = busStopList.some(stop => stop.id === parseInt(destinationStopId))
+        const isBoardingStopExist = busStopList.find(stop => stop.id === parseInt(boardingStationId))
+        const isDestinationStopExist = busStopList.find(stop => stop.id === parseInt(destinationStopId))
 
         if (!isBoardingStopExist || !isDestinationStopExist) {
             return res.status(400)
                 .json({
                     success: false,
                     message: "Boarding Stop or Destination Stop is wrong"
+                })
+        }
+
+        // Now check that the amount paid by user is actually equal to the prices or not. 
+        const amountToPay = isDestinationStopExist.ticketPrice - isBoardingStopExist.ticketPrice
+
+        if (amountToPay !== parseFloat(amountPaid.toString())) {
+            return res.status(400)
+                .json({
+                    success: false,
+                    message: "Amount paid is not correct."
                 })
         }
 
@@ -89,7 +107,8 @@ export async function registerBooking(req: Request, res: Response) {
                 amountPaid: parseFloat(amountPaid),
                 emailId: emailId,
                 mobileNumber: phoneNo,
-                emergencyContactNumber: emergencyContactNumber
+                emergencyContactNumber: emergencyContactNumber,
+                bookedSeatNumber: seatsBooked
             }
         })
 
@@ -104,7 +123,7 @@ export async function registerBooking(req: Request, res: Response) {
 
         // Array of booked seat number
         let seatMatrixToUpdate: boolean[] = isBusExist.seatMatrix;
-        let index=0;
+        let index = 0;
         // Register passengers in the bus. 
         passengersList.map(async (passengerDetails: passenger) => {
             if (!passengerDetails.name || !passengerDetails.age || !passengerDetails.gender) {
@@ -118,7 +137,18 @@ export async function registerBooking(req: Request, res: Response) {
             if (passengerDetails.gender === "male") passengerGender = Gender.Male;
             else if (passengerDetails.gender === "female") passengerGender = Gender.Female
             else passengerGender = Gender.Other
-            seatMatrixToUpdate[seatsBooked[index]-1] = true;
+
+            if (seatMatrixToUpdate[seatsBooked[index - 1]] === true) {
+                for (let i = 0; i < seatMatrixToUpdate.length; i++) {
+                    if (seatMatrixToUpdate[i] === false) {
+                        seatMatrixToUpdate[i] = true;
+                        seatsBooked[index - 1] = i;
+                    }
+                }
+            }
+            else {
+                seatMatrixToUpdate[seatsBooked[index - 1]] = true;
+            }
 
             const passengerRegistration = await prisma.passenger.create({
                 data: {
@@ -126,7 +156,6 @@ export async function registerBooking(req: Request, res: Response) {
                     age: parseInt(passengerDetails.age.toString()),
                     gender: passengerGender,
                     bookingId: booking.id,
-                    bookedSeatNumber: seatsBooked[index]-1
                 }
             })
 
@@ -140,6 +169,7 @@ export async function registerBooking(req: Request, res: Response) {
             index++
         })
 
+
         // Now update the seat matrix of bus.
         const updatedBus = await prisma.bus.update({
             where: {
@@ -150,18 +180,37 @@ export async function registerBooking(req: Request, res: Response) {
             }
         })
 
-
+        // now update the booking. 
+        const updatedBooking = await prisma.booking.update({
+            where: {
+                id: booking.id
+            },
+            data: {
+                bookedSeatNumber: seatsBooked
+            }
+        })
 
         // Payment flow
+        const order = await razorpay.orders.create({
+            amount: booking.amountPaid * 100,
+            currency: "INR",
+            receipt: `receipt-${Date.now()}`,
+            notes: {
+                bookingId: booking.id
+            }
+        })
 
         // Send Email
 
         // Now we have to send the booking of the passengers.
-        const bookingData = await prisma.booking.findFirst({
-            where:{
+        const bookingData = await prisma.booking.update({
+            where: {
                 id: booking.id
             },
-            include:{
+            data: {
+                razorpayId: order.id,
+            },
+            include: {
                 boardingStation: true,
                 destinationStop: true,
                 PassengersList: true,
@@ -191,82 +240,236 @@ export async function registerBooking(req: Request, res: Response) {
 }
 
 
-export async function cancelBooking(req: Request, res: Response, next: NextFunction) {
+function reassignSeats(
+    requestedSeats: number[],
+    seatMatrix: boolean[]
+): number[] {
+    const updatedSeats: number[] = [];
+    const usedSeats = new Set<number>();
+
+    for (let seat of requestedSeats) {
+        // If requested seat is free → use it
+        if (seatMatrix[seat] === false && !usedSeats.has(seat)) {
+            updatedSeats.push(seat);
+            usedSeats.add(seat);
+            continue;
+        }
+
+        // Else find next free seat
+        const freeSeatIndex = seatMatrix.findIndex(
+            (s, idx) => s === false && !usedSeats.has(idx)
+        );
+
+        if (freeSeatIndex === -1) {
+            throw new Error("No available seats left");
+        }
+
+        updatedSeats.push(freeSeatIndex);
+        usedSeats.add(freeSeatIndex);
+    }
+
+    return updatedSeats;
+}
+
+
+export async function createBookingAndOrder(req: Request, res: Response) {
     try {
-        // Check that the user is logged in or not. 
-        const user = req.user
-
+        const user = req.user;
         if (!user) {
-            return res.status(400)
-                .json({
-                    success: false,
-                    message: "User is not logged in"
-                })
+            return res.status(401).json({ success: false, message: "Unauthorized" });
+        }
+
+        const {
+            busId,
+            passengersList,
+            boardingStationId,
+            destinationStopId,
+            seatsBooked,
+            emailId, phoneNo, emergencyContactNumber
+        } = req.body;
+
+        if (!busId || !passengersList || !boardingStationId || !destinationStopId || !seatsBooked || !emailId || !phoneNo) {
+            return res.status(400).json({ success: false, message: "Missing fields" });
+        }
+
+        // 1️⃣ Fetch bus + stops
+        const bus = await prisma.bus.findUnique({
+            where: { id: busId },
+            include: { busDetails: { include: { stops: true } } },
+        });
+
+        if (!bus) {
+            return res.status(404).json({ success: false, message: "Bus not found" });
+        }
+
+        const boarding = bus.busDetails.stops.find(s => s.id === Number(boardingStationId));
+        const destination = bus.busDetails.stops.find(s => s.id === Number(destinationStopId));
+
+        if (!boarding || !destination) {
+            return res.status(400).json({ success: false, message: "Invalid stops" });
+        }
+
+        const amountToPay = destination.ticketPrice - boarding.ticketPrice;
+
+        let finalSeats: number[];
+
+        try {
+            finalSeats = reassignSeats(seatsBooked, bus.seatMatrix);
+        } catch (err: any) {
+            return res.status(409).json({
+                success: false,
+                message: "Not enough seats available",
+            });
         }
 
 
-        // Fetch the booking id from the frontend.
-        const bookingId = req.params.bookingId
-
-        if (!bookingId) {
-            return res.status(404)
-                .json({
-                    success: false,
-                    message: "Booking Id is required to cancel booking"
-                })
-        }
-
-        // Now Check that the booking exist or not.
-        const isBookingExist = await prisma.booking.findFirst({
-            where: {
-                id: bookingId
-            },
-            include: {
-                bus: true,
-                PassengersList: true
-            }
-        })
-
-        if (!isBookingExist) {
-            return res.status(400)
-                .json({
-                    success: false,
-                    message: "Ticket booking does not exist with this booking id"
-                })
-        }
-
-        // Now find the seats occupied by this booking. 
-        const seatMatrix = isBookingExist.bus.seatMatrix
-
-        isBookingExist.PassengersList.map((passenger) => {
-            seatMatrix[passenger.bookedSeatNumber] = false;
-        })
-
-        const updatedBus = await prisma.bus.update({
-            where: {
-                id: isBookingExist.busId
-            },
+        // 3️⃣ Create PENDING booking
+        const booking = await prisma.booking.create({
             data: {
-                seatMatrix: seatMatrix
-            }
-        })
+                busId,
+                userBookingId: user.id,
+                boardingStationId: boarding.id,
+                destinationStopId: destination.id,
+                amountPaid: amountToPay,
+                bookedSeatNumber: finalSeats,
+                emailId: emailId,
+                mobileNumber: phoneNo,
+                emergencyContactNumber: emergencyContactNumber
+            },
+        });
 
+        // 4️⃣ Create Razorpay order
+        const order = await razorpay.orders.create({
+            amount: amountToPay * 100,
+            currency: "INR",
+        });
 
-        // Delete booking
-        await prisma.booking.delete({
-            where: {
-                id: bookingId
-            }
-        })
+        // 5️⃣ Save order id
+        await prisma.booking.update({
+            where: { id: booking.id },
+            data: { razorpayId: order.id },
+        });
 
-        req.bookingId = bookingId
-        next()
+        // Just for test mode.
+
+        await confirmBooking({ bookingId: booking.id });
+
+        return res.status(200).json({
+            success: true,
+            orderId: order.id,
+            amount: order.amount,
+            bookingId: booking.id,
+            assignedSeats: finalSeats,
+            seatChanged: JSON.stringify(finalSeats) !== JSON.stringify(seatsBooked),
+        });
+
     } catch (error: any) {
-        console.log(error)
-        return null;
-
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: error.message || "Order creation failed",
+        });
     }
 }
+
+
+
+export async function cancelBooking(req: Request, res: Response) {
+  try {
+    const user = req.user;
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "User is not logged in",
+      });
+    }
+
+    const bookingId = (req.params.bookingId);
+
+    if (!bookingId) {
+      return res.status(400).json({
+        success: false,
+        message: "Booking ID is required",
+      });
+    }
+
+    // 1️⃣ Fetch booking
+    const booking = await prisma.booking.findUnique({
+      where: { id: bookingId },
+      include: { bus: true },
+    });
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: "Booking not found",
+      });
+    }
+
+    // 2️⃣ Ownership check
+    if (booking.userBookingId !== user.id) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not allowed to cancel this booking",
+      });
+    }
+
+    // 3️⃣ Idempotency
+    if (booking.status === "CANCELLED") {
+      return res.status(200).json({
+        success: true,
+        message: "Booking already cancelled",
+      });
+    }
+
+    if (booking.status !== "CONFIRMED") {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot cancel booking with status ${booking.status}`,
+      });
+    }
+
+    // 4️⃣ Free seats
+    const seatMatrix = [...booking.bus.seatMatrix];
+    for (const seat of booking.bookedSeatNumber) {
+      seatMatrix[seat] = false;
+    }
+
+    await prisma.bus.update({
+      where: { id: booking.busId },
+      data: { seatMatrix },
+    });
+
+    // 5️⃣ Refund payment (IMPORTANT)
+    if (booking.paymentId) {
+      await razorpay.payments.refund(booking.paymentId, {
+        amount: booking.amountPaid * 100, // in paise
+      });
+    }
+
+    // 6️⃣ Update booking status
+    await prisma.booking.update({
+      where: { id: booking.id },
+      data: {
+        status: "CANCELLED",
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Booking cancelled and refund initiated",
+    });
+
+  } catch (error: any) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Error while cancelling booking",
+    });
+  }
+}
+
 
 
 export async function sendEmailforBooking(req: Request, res: Response) {
@@ -283,21 +486,21 @@ export async function sendEmailforBooking(req: Request, res: Response) {
         }
 
         const booking = await prisma.booking.findFirst({
-            where:{
+            where: {
                 id: bookingId
             },
-            include:{
+            include: {
                 bus: true,
                 bookingUser: true,
             }
         })
 
-        if(!booking){
+        if (!booking) {
             return res.status(200)
-            .json({
-                success: false,
-                message: "Booking does not exist with this id"
-            })
+                .json({
+                    success: false,
+                    message: "Booking does not exist with this id"
+                })
         }
 
         const data = {
@@ -347,7 +550,7 @@ export async function sendEmailforBooking(req: Request, res: Response) {
             to: booking?.emailId,
             subject: "Verify Your Email",
             html: emailContent,
-            attachments:[
+            attachments: [
                 {
                     filename: `${booking.id}.pdf`,
                     content: Buffer.from(pdfBuffer),
@@ -427,29 +630,29 @@ export async function sendEmailForCancellation(req: Request, res: Response) {
 }
 
 
-export async function fetchUserBookings(req:Request,res: Response){
+export async function fetchUserBookings(req: Request, res: Response) {
     try {
         const userId = req.params.userId
-    
-        if(!userId){
+
+        if (!userId) {
             return res.status(400)
-            .json({
-                success: false,
-                message: "User id is required"
-            })
+                .json({
+                    success: false,
+                    message: "User id is required"
+                })
         }
-    
+
         const user = await prisma.user.findFirst({
-            where:{
+            where: {
                 id: userId
             },
-            include:{
+            include: {
                 bookings: {
-                    include:{
+                    include: {
                         bus: {
-                            include:{
+                            include: {
                                 busDetails: {
-                                    include:{
+                                    include: {
                                         stops: true
                                     }
                                 }
@@ -462,42 +665,101 @@ export async function fetchUserBookings(req:Request,res: Response){
                 }
             }
         })
-    
-        if(!user){
+
+        if (!user) {
             return res.status(400)
-            .json({
-                success: false,
-                message: "User does not exist."
-            })
+                .json({
+                    success: false,
+                    message: "User does not exist."
+                })
         }
 
         // Sort stops for each bus by arrivalTime
-        user.bookings.map((booking) =>{
+        user.bookings.map((booking) => {
             booking.bus.busDetails.stops.sort((a, b) => {
-            // Use "00:00" as default if arrivalTime is undefined
-            const [ah = 0, am = 0] = (a.arrivalTime ?? "00:00").split(":").map(Number);
-            const [bh = 0, bm = 0] = (b.arrivalTime ?? "00:00").split(":").map(Number);
+                // Use "00:00" as default if arrivalTime is undefined
+                const [ah = 0, am = 0] = (a.arrivalTime ?? "00:00").split(":").map(Number);
+                const [bh = 0, bm = 0] = (b.arrivalTime ?? "00:00").split(":").map(Number);
 
-            if (ah !== bh) return ah - bh;
-            return am - bm;
-        })})
-    
-        return res.status(200)
-        .json({
-            success: true,
-            message: "Booking fetched successfully",
-            bookings: user.bookings
+                if (ah !== bh) return ah - bh;
+                return am - bm;
+            })
         })
-    } catch (error:any) {
+
+        return res.status(200)
+            .json({
+                success: true,
+                message: "Booking fetched successfully",
+                bookings: user.bookings
+            })
+    } catch (error: any) {
         console.log(error)
         return res.status(500)
-        .json({
-            success: false,
-            message: error.message || "Server error while fetching bookings."
-        })
-        
+            .json({
+                success: false,
+                message: error.message || "Server error while fetching bookings."
+            })
+
     }
 }
 
+
+export async function updateBusIssue(req: Request, res: Response) {
+    try {
+        const busId = req.params.busId
+        const { busIssue, descriptions } = req.body
+
+
+        if (!busId) {
+            return res.status(404)
+                .json({
+                    success: false,
+                    message: "Bus id is required"
+                })
+        }
+
+        if (!busIssue) {
+            return res.status(404)
+                .json({
+                    success: false,
+                    message: "bus issue is required"
+                })
+        }
+
+        const bus = await prisma.bus.update({
+            where: {
+                id: busId
+            },
+            data: {
+                issue: busIssue,
+                issudeDescription: descriptions
+            }
+        })
+
+        if (!bus) {
+            return res.status(400)
+                .json({
+                    success: false,
+                    message: "Bus does not exist with this id"
+                })
+        }
+
+        return res.status(200)
+            .json({
+                success: true,
+                message: "Bus Detail update successfully",
+                busDetail: bus
+            })
+
+    } catch (error: any) {
+        console.log(error)
+        return res.status(500)
+            .json({
+                success: false,
+                message: error.message || "Server error while updating bus issue"
+            })
+
+    }
+}
 
 
